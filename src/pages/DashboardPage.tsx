@@ -1,51 +1,61 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Package, AlertTriangle, TrendingUp, Coins } from 'lucide-react';
- 
-const stats = [
-  { title: 'Товарів у каталозі', value: '—', icon: Package,        color: 'text-blue-600' },
-  { title: 'Нижче ROP',          value: '—', icon: AlertTriangle,  color: 'text-orange-600' },
-  { title: 'Прогноз на місяць',  value: '—', icon: TrendingUp,     color: 'text-green-600' },
-  { title: 'Вартість запасів',   value: '—', icon: Coins,          color: 'text-purple-600' },
-];
- 
+import { useEffect, useState } from 'react';
+import StatsCards from '@/components/dashboard/StatsCards';
+import AbcPieChart from '@/components/dashboard/AbcPieChart';
+import ReorderTable from '@/components/dashboard/ReorderTable';
+import { getReorderAlerts, getAbcXyz } from '@/api/dashboard';
+import type { ReorderItem, AbcItem } from '@/types/dashboard';
+
 export default function DashboardPage() {
+  const [reorderItems, setReorderItems] = useState<ReorderItem[]>([]);
+  const [abcItems, setAbcItems]         = useState<AbcItem[]>([]);
+  const [loading, setLoading]           = useState(true);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [reorder, abc] = await Promise.all([
+          getReorderAlerts(),
+          getAbcXyz(),
+        ]);
+        setReorderItems(reorder);
+        setAbcItems(abc);
+      } catch (err) {
+        console.error('Dashboard load error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  // Рахуємо метрики з отриманих даних
+  const forecastedSales = abcItems.reduce((sum, i) => sum + i.revenue, 0) / 12;
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
         <p className="text-slate-500">Огляд ключових показників системи</p>
       </div>
- 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-slate-600">
-                {stat.title}
-              </CardTitle>
-              <stat.icon className={`h-5 w-5 ${stat.color}`} />
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{stat.value}</div>
-              <p className="text-xs text-slate-500 mt-1">
-                Дані з\'являться після наповнення системи
-              </p>
-            </CardContent>
-          </Card>
-        ))}
+
+      {/* Рядок 1: 4 метрики */}
+      <StatsCards
+        totalProducts={abcItems.length}
+        reorderCount={reorderItems.length}
+        forecastedSales={forecastedSales}
+        loading={loading}
+      />
+
+      {/* Рядок 2: ABC-діаграма + таблиця критичних залишків */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          {!loading && <AbcPieChart items={abcItems} />}
+        </div>
+        <div className="lg:col-span-2">
+          {!loading && <ReorderTable items={reorderItems} />}
+        </div>
       </div>
- 
-      <Card>
-        <CardHeader>
-          <CardTitle>У розробці</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-slate-600">
-            Графіки продажів, топ товарів та критичні залишки будуть додані
-            у Day 20 (тиждень 3 — UI з даними).
-          </p>
-        </CardContent>
-      </Card>
     </div>
   );
 }
+

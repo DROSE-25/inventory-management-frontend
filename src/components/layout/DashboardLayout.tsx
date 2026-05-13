@@ -28,7 +28,7 @@ export default function DashboardLayout() {
   return (
     <div className="min-h-screen flex bg-slate-50">
       {/* Бічне меню */}
-      <aside className="w-64 bg-slate-900 text-white flex flex-col">
+      <aside className="w-64 bg-rose-600 text-white flex flex-col">
         <div className="p-6 border-b border-slate-700">
           <div className="flex items-center gap-2">
             <Package className="h-6 w-6" />
