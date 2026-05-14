@@ -9,6 +9,7 @@ import SalesPage from '@/pages/SalesPage';
 import UsersPage from '@/pages/UsersPage'; // Додано
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PrivateRoute from '@/components/PrivateRoute';
+import ReportsPage from '@/pages/ReportsPage';
 
 // Заглушки для майбутніх сторінок
 const Placeholder = ({ title }: { title: string }) => (
@@ -37,7 +38,7 @@ function App() {
           <Route path="/sales"      element={<SalesPage />} />
           <Route path="/warehouses" element={<WarehousesPage />} />
           <Route path="/forecasts"  element={<ForecastsPage />} />
-          <Route path="/reports"    element={<Placeholder title="Звіти" />} />
+          <Route path="/reports" element={<ReportsPage />} />
           
           {/* Додано маршрут для користувачів з перевіркою ролі */}
           <Route 
