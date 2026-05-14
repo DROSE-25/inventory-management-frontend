@@ -3,6 +3,9 @@ import { Plus, Pencil, Trash2, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/ui/empty-state';
+import toast from 'react-hot-toast';
 import {
   Dialog, DialogContent, DialogHeader,
   DialogTitle, DialogFooter
@@ -16,14 +19,22 @@ import ConfirmDialog from '@/components/ui/confirm-dialog';
 import { useAuthStore } from '@/store/authStore';
 import {
   getProducts, createProduct, updateProduct,
-  deleteProduct, getAllSuppliers
+  deleteProduct, getAllSuppliers, getCategories
 } from '@/api/products';
 import type { Product, ProductForm } from '@/types/product';
 import type { Supplier } from '@/types/supplier';
 
+interface Category {
+  id: number;
+  name: string;
+}
+
 const emptyForm: ProductForm = {
   name: '', sku: '', unitPrice: 0,
-  unitOfMeasure: 'шт', orderingCost: 0, supplierId: 0,
+  unitOfMeasure: 'шт', orderingCost: 0,
+  supplierId: 0, categoryId: 0,
+  holdingCostRate: 0.25, 
+  serviceLevel: 0.95, 
 };
 
 export default function ProductsPage() {
@@ -32,19 +43,18 @@ export default function ProductsPage() {
 
   const [products, setProducts]     = useState<Product[]>([]);
   const [suppliers, setSuppliers]   = useState<Supplier[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState('');
   const [page, setPage]             = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Модалка форми
   const [formOpen, setFormOpen]     = useState(false);
   const [editItem, setEditItem]     = useState<Product | null>(null);
   const [form, setForm]             = useState<ProductForm>(emptyForm);
   const [saving, setSaving]         = useState(false);
   const [formError, setFormError]   = useState('');
 
-  // Модалка підтвердження видалення
   const [deleteId, setDeleteId]     = useState<number | null>(null);
   const [deleting, setDeleting]     = useState(false);
 
@@ -63,12 +73,11 @@ export default function ProductsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Завантажити постачальників один раз
   useEffect(() => {
     getAllSuppliers().then(setSuppliers).catch(() => {});
+    getCategories().then(setCategories).catch(() => {});
   }, []);
 
-  // Відкрити форму для створення
   const openCreate = () => {
     setEditItem(null);
     setForm(emptyForm);
@@ -76,20 +85,22 @@ export default function ProductsPage() {
     setFormOpen(true);
   };
 
-  // Відкрити форму для редагування
-  const openEdit = (p: Product) => {
-    setEditItem(p);
-    setForm({
-      name: p.name,
-      sku: p.sku,
-      unitPrice: p.unitPrice,
-      unitOfMeasure: p.unitOfMeasure,
-      orderingCost: p.orderingCost,
-      supplierId: p.supplier?.id ?? 0,
-    });
-    setFormError('');
-    setFormOpen(true);
-  };
+const openEdit = (p: Product) => {
+  setEditItem(p);
+  setForm({
+    name: p.name,
+    sku: p.sku,
+    unitPrice: p.unitPrice,
+    unitOfMeasure: p.unitOfMeasure,
+    orderingCost: p.orderingCost,
+    supplierId: p.supplier?.id ?? 0,
+    categoryId: (p as any).category?.id ?? 0,
+    holdingCostRate: (p as any).holdingCostRate ?? 0.25,  // ← додати
+    serviceLevel: (p as any).serviceLevel ?? 0.95,         // ← додати
+  });
+  setFormError('');
+  setFormOpen(true);
+};
 
   const handleSave = async () => {
     if (!form.name.trim() || !form.sku.trim()) {
@@ -109,9 +120,10 @@ export default function ProductsPage() {
         await createProduct(form);
       }
       setFormOpen(false);
+      toast.success(editItem ? 'Збережено' : 'Створено');
       load();
     } catch (e: any) {
-      setFormError(e.response?.data?.message ?? 'Помилка збереження');
+      toast.error(e.response?.data?.message ?? 'Помилка збереження');
     } finally {
       setSaving(false);
     }
@@ -123,6 +135,7 @@ export default function ProductsPage() {
     try {
       await deleteProduct(deleteId);
       setDeleteId(null);
+      toast.success('Видалено');
       load();
     } catch {
       setDeleteId(null);
@@ -133,7 +146,6 @@ export default function ProductsPage() {
 
   return (
     <div className="space-y-4">
-      {/* Шапка */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Товари</h1>
@@ -147,7 +159,6 @@ export default function ProductsPage() {
         )}
       </div>
 
-      {/* Пошук */}
       <div className="relative max-w-sm">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
         <Input
@@ -158,7 +169,6 @@ export default function ProductsPage() {
         />
       </div>
 
-      {/* Таблиця */}
       <div className="border rounded-lg overflow-hidden bg-white">
         <table className="w-full text-sm">
           <thead>
@@ -166,7 +176,7 @@ export default function ProductsPage() {
               <th className="text-left p-3 font-medium">Назва</th>
               <th className="text-left p-3 font-medium">SKU</th>
               <th className="text-right p-3 font-medium">Ціна</th>
-              <th className="text-left p-3 font-medium">Одиниця</th>
+              <th className="text-left p-3 font-medium">Категорія</th>
               <th className="text-left p-3 font-medium">Постачальник</th>
               <th className="text-center p-3 font-medium">Статус</th>
               {isAdmin && <th className="text-center p-3 font-medium">Дії</th>}
@@ -174,15 +184,26 @@ export default function ProductsPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr>
-                <td colSpan={isAdmin ? 7 : 6} className="p-8 text-center text-slate-400">
-                  Завантаження...
-                </td>
-              </tr>
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="border-b">
+                  <td className="p-3"><Skeleton className="h-4 w-32" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-20" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-20" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-24" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+                  {isAdmin && <td className="p-3"><Skeleton className="h-4 w-16" /></td>}
+                </tr>
+              ))
             ) : products.length === 0 ? (
               <tr>
-                <td colSpan={isAdmin ? 7 : 6} className="p-8 text-center text-slate-400">
-                  Товарів не знайдено
+                <td colSpan={isAdmin ? 7 : 6}>
+                  <EmptyState
+                    title="Товарів не знайдено"
+                    description="Додайте перший товар до каталогу"
+                    actionLabel={isAdmin ? "Додати товар" : undefined}
+                    onAction={isAdmin ? openCreate : undefined}
+                  />
                 </td>
               </tr>
             ) : products.map((prod, i) => (
@@ -190,8 +211,8 @@ export default function ProductsPage() {
                 <td className="p-3 font-medium">{prod.name}</td>
                 <td className="p-3 text-slate-500 font-mono text-xs">{prod.sku}</td>
                 <td className="p-3 text-right">{prod.unitPrice?.toFixed(2)} грн</td>
-                <td className="p-3">{prod.unitOfMeasure}</td>
-                <td className="p-3">{prod.supplier?.name ?? '—'}</td>
+                <td className="p-3 text-slate-500">{(prod as any).categoryName ?? (prod as any).category?.name ?? '—'}</td>
+                <td className="p-3">{(prod as any).supplierName ?? prod.supplier?.name ?? '—'}</td>
                 <td className="p-3 text-center">
                   <Badge variant={prod.isActive ? 'default' : 'secondary'}>
                     {prod.isActive ? 'Активний' : 'Неактивний'}
@@ -217,7 +238,6 @@ export default function ProductsPage() {
         </table>
       </div>
 
-      {/* Пагінація */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <Button variant="outline" size="sm"
@@ -236,7 +256,6 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {/* Форма — Modal */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -248,13 +267,13 @@ export default function ProductsPage() {
           <div className="space-y-3 py-2">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Назва *</Label>
+                <Label className="mb-1 block">Назва *</Label>
                 <Input value={form.name}
                   onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="Назва товару" />
               </div>
               <div>
-                <Label>SKU *</Label>
+                <Label className="mb-1 block">SKU *</Label>
                 <Input value={form.sku}
                   onChange={e => setForm(f => ({ ...f, sku: e.target.value }))}
                   placeholder="ITEM-001" />
@@ -263,13 +282,13 @@ export default function ProductsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Ціна (грн) *</Label>
+                <Label className="mb-1 block">Ціна (грн) *</Label>
                 <Input type="number" min={0} step={0.01}
                   value={form.unitPrice}
                   onChange={e => setForm(f => ({ ...f, unitPrice: parseFloat(e.target.value) || 0 }))} />
               </div>
               <div>
-                <Label>Одиниця виміру</Label>
+                <Label className="mb-1 block">Одиниця виміру</Label>
                 <Input value={form.unitOfMeasure}
                   onChange={e => setForm(f => ({ ...f, unitOfMeasure: e.target.value }))}
                   placeholder="шт, кг, л..." />
@@ -278,13 +297,24 @@ export default function ProductsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Вартість замовлення</Label>
-                <Input type="number" min={0} step={0.01}
-                  value={form.orderingCost}
-                  onChange={e => setForm(f => ({ ...f, orderingCost: parseFloat(e.target.value) || 0 }))} />
+                <Label className="mb-1 block">Категорія</Label>
+                <Select
+                  value={form.categoryId ? String(form.categoryId) : ''}
+                  onValueChange={val => setForm(f => ({ ...f, categoryId: Number(val) }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Оберіть..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(c => (
+                      <SelectItem key={c.id} value={String(c.id)}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <Label>Постачальник *</Label>
+                <Label className="mb-1 block">Постачальник *</Label>
                 <Select
                   value={form.supplierId ? String(form.supplierId) : ''}
                   onValueChange={val => setForm(f => ({ ...f, supplierId: Number(val) }))}>
@@ -300,6 +330,13 @@ export default function ProductsPage() {
                   </SelectContent>
                 </Select>
               </div>
+            </div>
+
+            <div>
+              <Label className="mb-1 block">Вартість замовлення</Label>
+              <Input type="number" min={0} step={0.01}
+                value={form.orderingCost}
+                onChange={e => setForm(f => ({ ...f, orderingCost: parseFloat(e.target.value) || 0 }))} />
             </div>
 
             {formError && (
@@ -318,7 +355,6 @@ export default function ProductsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Підтвердження видалення */}
       <ConfirmDialog
         open={deleteId !== null}
         title="Видалити товар?"

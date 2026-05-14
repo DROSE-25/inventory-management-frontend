@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { Plus, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import toast from 'react-hot-toast';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/ui/empty-state';
 import {
   Dialog, DialogContent, DialogHeader,
   DialogTitle, DialogFooter
@@ -68,9 +71,10 @@ export default function WarehousesPage() {
         await createWarehouse(form);
       }
       setFormOpen(false);
+      toast.success(editItem ? 'Склад оновлено' : 'Склад створено');
       load();
     } catch (e: any) {
-      setFormError(e.response?.data?.message ?? 'Помилка збереження');
+      toast.error(e.response?.data?.message ?? 'Помилка збереження');
     } finally {
       setSaving(false);
     }
@@ -104,31 +108,48 @@ export default function WarehousesPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={isAdmin ? 5 : 4} className="p-8 text-center text-slate-400">Завантаження...</td></tr>
-            ) : warehouses.length === 0 ? (
-              <tr><td colSpan={isAdmin ? 5 : 4} className="p-8 text-center text-slate-400">Складів не знайдено</td></tr>
-            ) : warehouses.map((w, i) => (
-              <tr key={w.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
-                <td className="p-3 font-medium">{w.name}</td>
-                <td className="p-3 text-slate-500">{w.address || '—'}</td>
-                <td className="p-3 text-right">{w.capacity?.toLocaleString()} од.</td>
-                <td className="p-3 text-center">
-                  <Badge variant={w.isActive ? 'default' : 'secondary'}>
-                    {w.isActive ? 'Активний' : 'Неактивний'}
-                  </Badge>
-                </td>
-                {isAdmin && (
-                  <td className="p-3 text-center">
-                    <Button size="sm" variant="outline" onClick={() => openEdit(w)}>
-                      <Pencil className="h-3 w-3" />
-                    </Button>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+  Array.from({ length: 5 }).map((_, i) => (
+    <tr key={i} className="border-b">
+      <td className="p-3"><Skeleton className="h-4 w-32" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-40" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+      {isAdmin && <td className="p-3"><Skeleton className="h-4 w-16" /></td>}
+    </tr>
+  ))
+) : warehouses.length === 0 ? (
+  <tr>
+    <td colSpan={isAdmin ? 5 : 4}>
+      <EmptyState
+        title="Складів не знайдено"
+        description="Додайте перший склад"
+        actionLabel={isAdmin ? "Додати склад" : undefined}
+        onAction={isAdmin ? openCreate : undefined}
+      />
+    </td>
+  </tr>
+) : warehouses.map((w, i) => (
+  <tr key={w.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
+    <td className="p-3 font-medium">{w.name}</td>
+    <td className="p-3 text-slate-500">{w.address || '—'}</td>
+    <td className="p-3 text-right">{w.capacity?.toLocaleString()} од.</td>
+    <td className="p-3 text-center">
+      <Badge variant={w.isActive ? 'default' : 'secondary'}>
+        {w.isActive ? 'Активний' : 'Неактивний'}
+      </Badge>
+    </td>
+    {isAdmin && (
+      <td className="p-3 text-center">
+        <Button size="sm" variant="outline" onClick={() => openEdit(w)}>
+          <Pencil className="h-3 w-3" />
+        </Button>
+      </td>
+    )}
+  </tr>
+))}
+        </tbody>
+      </table>
+    </div>
 
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-md">

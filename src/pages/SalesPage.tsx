@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import toast from 'react-hot-toast';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/ui/empty-state';
 import { Label } from '@/components/ui/label';
 import {
   Dialog, DialogContent, DialogHeader,
@@ -99,7 +102,7 @@ export default function SalesPage() {
     try {
       await createSale(form);
       setFormOpen(false);
-      setSuccessMsg('Продаж зареєстровано. Залишок оновлено.');
+      toast.success('Продаж зареєстровано. Залишок оновлено.');
       load();
       setTimeout(() => setSuccessMsg(''), 4000);
     } catch (e: any) {
@@ -153,24 +156,41 @@ export default function SalesPage() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr><td colSpan={7} className="p-8 text-center text-slate-400">Завантаження...</td></tr>
-            ) : sales.length === 0 ? (
-              <tr><td colSpan={7} className="p-8 text-center text-slate-400">Продажів не знайдено</td></tr>
-            ) : sales.map((s, i) => (
-              <tr key={s.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
-                <td className="p-3">{s.saleDate}</td>
-                <td className="p-3 font-medium">{s.product?.name ?? '—'}</td>
-                <td className="p-3 text-slate-500">{s.warehouse?.name ?? '—'}</td>
-                <td className="p-3 text-right">{s.quantity}</td>
-                <td className="p-3 text-right">{Number(s.unitPrice).toFixed(2)} грн</td>
-                <td className="p-3 text-right font-medium">{totalSum(s)} грн</td>
-                <td className="p-3 text-slate-500 text-xs">{s.createdBy}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+        {loading ? (
+  Array.from({ length: 5 }).map((_, i) => (
+    <tr key={i} className="border-b">
+      <td className="p-3"><Skeleton className="h-4 w-24" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-32" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-24" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-12" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-20" /></td>
+    </tr>
+  ))
+) : sales.length === 0 ? (
+  <tr>
+    <td colSpan={7}>
+      <EmptyState
+        title="Продажів не знайдено"
+        description="Зареєструйте перший продаж"
+      />
+    </td>
+  </tr>
+) : sales.map((s, i) => (
+  <tr key={s.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
+    <td className="p-3">{s.saleDate}</td>
+    <td className="p-3 font-medium">{s.product?.name ?? '—'}</td>
+    <td className="p-3 text-slate-500">{s.warehouse?.name ?? '—'}</td>
+    <td className="p-3 text-right">{s.quantity}</td>
+    <td className="p-3 text-right">{Number(s.unitPrice).toFixed(2)} грн</td>
+    <td className="p-3 text-right font-medium">{totalSum(s)} грн</td>
+    <td className="p-3 text-slate-500 text-xs">{s.createdBy}</td>
+  </tr>
+))}
+        </tbody>
+      </table>
+    </div>
 
       {/* Форма реєстрації продажу */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>

@@ -12,6 +12,10 @@ export interface Product {
   orderingCost: number;
   isActive: boolean;
   supplier: Supplier;
+  category?: {        // ← додати
+    id: number;
+    name: string;
+  };
 }
 
 export interface ProductForm {
@@ -21,6 +25,10 @@ export interface ProductForm {
   unitOfMeasure: string;
   orderingCost: number;
   supplierId: number;
+  categoryId: number;
+  holdingCostRate: number;
+  serviceLevel: number, 
+
 }
 
 // Бекенд повертає Page<T>

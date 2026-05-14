@@ -3,7 +3,10 @@ import { Plus, UserX, UserCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import toast from 'react-hot-toast';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/ui/empty-state';
 import {
   Dialog, DialogContent, DialogHeader,
   DialogTitle, DialogFooter
@@ -65,7 +68,7 @@ export default function UsersPage() {
     try {
       await createUser(form);
       setFormOpen(false);
-      setSuccessMsg('Користувача створено');
+      toast.success('Користувача створено');
       load();
       setTimeout(() => setSuccessMsg(''), 3000);
     } catch (e: any) {
@@ -121,46 +124,64 @@ export default function UsersPage() {
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="p-8 text-center text-slate-400">Завантаження...</td></tr>
-            ) : users.length === 0 ? (
-              <tr><td colSpan={6} className="p-8 text-center text-slate-400">Користувачів не знайдено</td></tr>
-            ) : users.map((u, i) => (
-              <tr key={u.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
-                <td className="p-3 font-medium">{u.username}</td>
-                <td className="p-3 text-slate-500">{u.email || '—'}</td>
-                <td className="p-3 text-center">
-                  <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${roleBadgeColor(u.role)}`}>
-                    {roleLabel(u.role)}
-                  </span>
-                </td>
-                <td className="p-3 text-center">
-                  <Badge variant={u.isActive ? 'default' : 'secondary'}>
-                    {u.isActive ? 'Активний' : 'Неактивний'}
-                  </Badge>
-                </td>
-                <td className="p-3 text-slate-500 text-xs">
-                  {u.createdAt ? new Date(u.createdAt).toLocaleDateString('uk-UA') : '—'}
-                </td>
-                <td className="p-3 text-center">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleToggle(u)}
-                    className={u.isActive
-                      ? 'text-red-600 hover:text-red-700 hover:border-red-300'
-                      : 'text-green-600 hover:text-green-700 hover:border-green-300'}
-                  >
-                    {u.isActive
-                      ? <><UserX className="h-3 w-3 mr-1" />Деактивувати</>
-                      : <><UserCheck className="h-3 w-3 mr-1" />Активувати</>
-                    }
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+  Array.from({ length: 5 }).map((_, i) => (
+    <tr key={i} className="border-b">
+      <td className="p-3"><Skeleton className="h-4 w-24" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-32" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-20" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-24" /></td>
+    </tr>
+  ))
+) : users.length === 0 ? (
+  <tr>
+    <td colSpan={6}>
+      <EmptyState
+        title="Користувачів не знайдено"
+        description="Створіть першого користувача"
+        actionLabel="Новий користувач"
+        onAction={() => { setForm(emptyForm); setFormError(''); setFormOpen(true); }}
+      />
+    </td>
+  </tr>
+) : users.map((u, i) => (
+  <tr key={u.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
+    <td className="p-3 font-medium">{u.username}</td>
+    <td className="p-3 text-slate-500">{u.email || '—'}</td>
+    <td className="p-3 text-center">
+      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${roleBadgeColor(u.role)}`}>
+        {roleLabel(u.role)}
+      </span>
+    </td>
+    <td className="p-3 text-center">
+      <Badge variant={u.isActive ? 'default' : 'secondary'}>
+        {u.isActive ? 'Активний' : 'Неактивний'}
+      </Badge>
+    </td>
+    <td className="p-3 text-slate-500 text-xs">
+      {u.createdAt ? new Date(u.createdAt).toLocaleDateString('uk-UA') : '—'}
+    </td>
+    <td className="p-3 text-center">
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={() => handleToggle(u)}
+        className={u.isActive
+          ? 'text-red-600 hover:text-red-700 hover:border-red-300'
+          : 'text-green-600 hover:text-green-700 hover:border-green-300'}
+      >
+        {u.isActive
+          ? <><UserX className="h-3 w-3 mr-1" />Деактивувати</>
+          : <><UserCheck className="h-3 w-3 mr-1" />Активувати</>
+        }
+      </Button>
+    </td>
+  </tr>
+))}
+        </tbody>
+      </table>
+    </div>
 
       {/* Форма створення */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>

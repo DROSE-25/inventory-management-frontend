@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import toast from 'react-hot-toast';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import EmptyState from '@/components/ui/empty-state';
 import {
   Dialog, DialogContent, DialogHeader,
   DialogTitle, DialogFooter
@@ -84,9 +87,10 @@ export default function SuppliersPage() {
         await createSupplier(form);
       }
       setFormOpen(false);
+      toast.success(editItem ? 'Збережено' : 'Створено');
       load();
     } catch (e: any) {
-      setFormError(e.response?.data?.message ?? 'Помилка збереження');
+      toast.error(e.response?.data?.message ?? 'Помилка збереження');
     } finally {
       setSaving(false);
     }
@@ -98,6 +102,7 @@ export default function SuppliersPage() {
     try {
       await deleteSupplier(deleteId);
       setDeleteId(null);
+      toast.success('Видалено');
       load();
     } catch {
       setDeleteId(null);
@@ -135,41 +140,60 @@ export default function SuppliersPage() {
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <tr><td colSpan={isAdmin ? 7 : 6} className="p-8 text-center text-slate-400">Завантаження...</td></tr>
-            ) : suppliers.length === 0 ? (
-              <tr><td colSpan={isAdmin ? 7 : 6} className="p-8 text-center text-slate-400">Постачальників не знайдено</td></tr>
-            ) : suppliers.map((s, i) => (
-              <tr key={s.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
-                <td className="p-3 font-medium">{s.name}</td>
-                <td className="p-3 text-slate-500">{s.contactEmail || '—'}</td>
-                <td className="p-3 text-slate-500">{s.contactPhone || '—'}</td>
-                <td className="p-3 text-right">{s.leadTimeDays} дн.</td>
-                <td className="p-3 text-right">{s.orderingCost?.toFixed(2)} грн</td>
-                <td className="p-3 text-center">
-                  <Badge variant={s.isActive ? 'default' : 'secondary'}>
-                    {s.isActive ? 'Активний' : 'Неактивний'}
-                  </Badge>
-                </td>
-                {isAdmin && (
-                  <td className="p-3">
-                    <div className="flex justify-center gap-2">
-                      <Button size="sm" variant="outline" onClick={() => openEdit(s)}>
-                        <Pencil className="h-3 w-3" />
-                      </Button>
-                      <Button size="sm" variant="outline"
-                        className="text-red-600 hover:text-red-700 hover:border-red-300"
-                        onClick={() => setDeleteId(s.id)}>
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  </td>
-                )}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+          {loading ? (
+  Array.from({ length: 5 }).map((_, i) => (
+    <tr key={i} className="border-b">
+      <td className="p-3"><Skeleton className="h-4 w-32" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-32" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-24" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-12" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+      {isAdmin && <td className="p-3"><Skeleton className="h-4 w-16" /></td>}
+    </tr>
+  ))
+) : suppliers.length === 0 ? (
+  <tr>
+    <td colSpan={isAdmin ? 7 : 6}>
+      <EmptyState
+        title="Постачальників не знайдено"
+        description="Додайте першого постачальника"
+        actionLabel={isAdmin ? "Додати постачальника" : undefined}
+        onAction={isAdmin ? openCreate : undefined}
+      />
+    </td>
+  </tr>
+) : suppliers.map((s, i) => (
+  <tr key={s.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
+    <td className="p-3 font-medium">{s.name}</td>
+    <td className="p-3 text-slate-500">{s.contactEmail || '—'}</td>
+    <td className="p-3 text-slate-500">{s.contactPhone || '—'}</td>
+    <td className="p-3 text-right">{s.leadTimeDays} дн.</td>
+    <td className="p-3 text-right">{s.orderingCost?.toFixed(2)} грн</td>
+    <td className="p-3 text-center">
+      <Badge variant={s.isActive ? 'default' : 'secondary'}>
+        {s.isActive ? 'Активний' : 'Неактивний'}
+      </Badge>
+    </td>
+    {isAdmin && (
+      <td className="p-3">
+        <div className="flex justify-center gap-2">
+          <Button size="sm" variant="outline" onClick={() => openEdit(s)}>
+            <Pencil className="h-3 w-3" />
+          </Button>
+          <Button size="sm" variant="outline"
+            className="text-red-600 hover:text-red-700 hover:border-red-300"
+            onClick={() => setDeleteId(s.id)}>
+            <Trash2 className="h-3 w-3" />
+          </Button>
+        </div>
+      </td>
+    )}
+  </tr>
+))}
+        </tbody>
+      </table>
+    </div>
 
       {/* Форма */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>

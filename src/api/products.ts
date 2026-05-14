@@ -34,3 +34,8 @@ export const getAllSuppliers = async () => {
   const res = await apiClient.get('/suppliers');
   return Array.isArray(res.data) ? res.data : res.data.content ?? [];
 };
+
+export const getCategories = async () => {
+  const res = await apiClient.get('/categories');
+  return Array.isArray(res.data) ? res.data : res.data.content ?? [];
+};
