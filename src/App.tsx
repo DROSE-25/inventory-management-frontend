@@ -1,11 +1,15 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import LoginPage from '@/pages/LoginPage';
 import DashboardPage from '@/pages/DashboardPage';
-import ForecastsPage from '@/pages/ForecastsPage'; // Додано імпорт
+import ProductsPage from '@/pages/ProductsPage';
+import SuppliersPage from '@/pages/SuppliersPage';
+import ForecastsPage from '@/pages/ForecastsPage';
+import WarehousesPage from '@/pages/WarehousesPage'; // Додано
+import SalesPage from '@/pages/SalesPage';           // Додано
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PrivateRoute from '@/components/PrivateRoute';
 
-// Заглушки для майбутніх сторінок (зробимо їх у Day 14+)
+// Заглушки для майбутніх сторінок
 const Placeholder = ({ title }: { title: string }) => (
   <div>
     <h1 className="text-2xl font-bold">{title}</h1>
@@ -27,11 +31,11 @@ function App() {
           }
         >
           <Route path="/dashboard"  element={<DashboardPage />} />
-          <Route path="/products"   element={<Placeholder title="Товари" />} />
-          <Route path="/sales"      element={<Placeholder title="Продажі" />} />
-          <Route path="/suppliers"  element={<Placeholder title="Постачальники" />} />
-          <Route path="/warehouses" element={<Placeholder title="Склади" />} />
-          <Route path="/forecasts"  element={<ForecastsPage />} /> {/* Замінено на реальну сторінку */}
+          <Route path="/products"   element={<ProductsPage />} />
+          <Route path="/suppliers"  element={<SuppliersPage />} />
+          <Route path="/sales"      element={<SalesPage />} /> {/* Замінено */}
+          <Route path="/warehouses" element={<WarehousesPage />} /> {/* Замінено */}
+          <Route path="/forecasts"  element={<ForecastsPage />} />
           <Route path="/reports"    element={<Placeholder title="Звіти" />} />
         </Route>
 

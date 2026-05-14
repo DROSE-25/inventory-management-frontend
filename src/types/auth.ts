@@ -1,6 +1,6 @@
 // src/types/auth.ts
 
-export type Role = 'ADMIN' | 'MANAGER' | 'ANALYST';
+export type Role = 'ADMIN' | 'MANAGER' | 'ANALYST' | 'ROLE_ADMIN' | 'ROLE_MANAGER' | 'ROLE_ANALYST';
 
 export interface LoginRequest {
   username: string;
