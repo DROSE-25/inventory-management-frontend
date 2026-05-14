@@ -1,17 +1,21 @@
 import { Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
-import type { ReactNode } from 'react';
- 
+
 interface Props {
-  children: ReactNode;
+  children: React.ReactNode;
+  requiredRole?: string;
 }
- 
-export default function PrivateRoute({ children }: Props) {
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
- 
+
+export default function PrivateRoute({ children, requiredRole }: Props) {
+  const { isAuthenticated, user } = useAuthStore();
+
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
- 
+
+  if (requiredRole && user?.role !== requiredRole) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return <>{children}</>;
 }

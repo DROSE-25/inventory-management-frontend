@@ -4,8 +4,9 @@ import DashboardPage from '@/pages/DashboardPage';
 import ProductsPage from '@/pages/ProductsPage';
 import SuppliersPage from '@/pages/SuppliersPage';
 import ForecastsPage from '@/pages/ForecastsPage';
-import WarehousesPage from '@/pages/WarehousesPage'; // Додано
-import SalesPage from '@/pages/SalesPage';           // Додано
+import WarehousesPage from '@/pages/WarehousesPage';
+import SalesPage from '@/pages/SalesPage';
+import UsersPage from '@/pages/UsersPage'; // Додано
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PrivateRoute from '@/components/PrivateRoute';
 
@@ -33,10 +34,20 @@ function App() {
           <Route path="/dashboard"  element={<DashboardPage />} />
           <Route path="/products"   element={<ProductsPage />} />
           <Route path="/suppliers"  element={<SuppliersPage />} />
-          <Route path="/sales"      element={<SalesPage />} /> {/* Замінено */}
-          <Route path="/warehouses" element={<WarehousesPage />} /> {/* Замінено */}
+          <Route path="/sales"      element={<SalesPage />} />
+          <Route path="/warehouses" element={<WarehousesPage />} />
           <Route path="/forecasts"  element={<ForecastsPage />} />
           <Route path="/reports"    element={<Placeholder title="Звіти" />} />
+          
+          {/* Додано маршрут для користувачів з перевіркою ролі */}
+          <Route 
+            path="/users" 
+            element={
+              <PrivateRoute requiredRole="ROLE_ADMIN">
+                <UsersPage />
+              </PrivateRoute>
+            } 
+          />
         </Route>
 
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
