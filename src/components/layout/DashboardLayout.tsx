@@ -3,14 +3,13 @@ import { useAuthStore } from '@/store/authStore';
 import { Button } from '@/components/ui/button';
 import {
   Package, LayoutDashboard, ShoppingCart, Truck,
-  Warehouse, BarChart3, FileText, LogOut, User, Users // Додано Users
+  Warehouse, BarChart3, FileText, LogOut, User, Users
 } from 'lucide-react';
 
 export default function DashboardLayout() {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  // Зміна 2: Перевірка ролі адміна та формування списку меню
   const isAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN';
 
   const navItems = [
@@ -31,7 +30,6 @@ export default function DashboardLayout() {
 
   return (
     <div className="min-h-screen flex bg-slate-50">
-      {/* Зміна 3: Бічне меню (змінено bg-rose-600 на bg-slate-900) */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col">
         <div className="p-6 border-b border-slate-700">
           <div className="flex items-center gap-2">
@@ -59,16 +57,14 @@ export default function DashboardLayout() {
         </nav>
       </aside>
 
-      {/* Основна частина */}
       <div className="flex-1 flex flex-col">
-        {/* Шапка */}
         <header className="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between">
           <div></div>
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-slate-500" />
               <span className="font-medium">{user?.username}</span>
-              <span className="text-slate-500">({user?.role})</span>
+              <span className="text-slate-500">({user?.role?.replace('ROLE_', '')})</span>
             </div>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
@@ -77,7 +73,6 @@ export default function DashboardLayout() {
           </div>
         </header>
 
-        {/* Контент сторінок */}
         <main className="flex-1 p-6">
           <Outlet />
         </main>

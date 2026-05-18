@@ -39,3 +39,28 @@ export const getProductsReport = async () => {
   const res = await apiClient.get('/products', { params: { page: 0, size: 100 } });
   return Array.isArray(res.data) ? res.data : res.data.content ?? [];
 };
+
+export const downloadAbcXyzExcel = async () => {
+  const res = await apiClient.get('/reports/excel/abc-xyz', {
+    responseType: 'blob',
+  });
+  const url = URL.createObjectURL(res.data);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'abc_xyz_analysis.xlsx';
+  a.click();
+  URL.revokeObjectURL(url);
+};
+
+// Завантаження PDF з бекенду
+export const downloadAbcXyzPdf = async () => {
+  const res = await apiClient.get('/reports/pdf/abc-xyz', {
+    responseType: 'blob',
+  });
+  const url = URL.createObjectURL(res.data);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'abc_xyz_analysis.pdf';
+  a.click();
+  URL.revokeObjectURL(url);
+};

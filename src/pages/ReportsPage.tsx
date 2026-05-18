@@ -7,6 +7,8 @@ import {
   getAbcXyzReport,
   getReorderAlertsReport,
   getProductsReport,
+  downloadAbcXyzExcel,
+  downloadAbcXyzPdf,
 } from '@/api/reports';
 import toast from 'react-hot-toast';
 
@@ -51,6 +53,20 @@ export default function ReportsPage() {
     }));
     downloadCsv(rows, 'abc_xyz_analysis.csv');
     toast.success('CSV завантажено');
+  };
+
+  const handleAbcExcel = async () => {
+    try {
+      await downloadAbcXyzExcel();
+      toast.success('Excel завантажено');
+    } catch { toast.error('Помилка завантаження Excel'); }
+  };
+
+  const handleAbcPdf = async () => {
+    try {
+      await downloadAbcXyzPdf();
+      toast.success('PDF завантажено');
+    } catch { toast.error('Помилка завантаження PDF'); }
   };
 
   const handleReorderCsv = () => {
@@ -122,6 +138,8 @@ export default function ReportsPage() {
           description="Класифікація товарів за оборотом та стабільністю попиту"
           rowCount={loading ? undefined : abcData.length}
           onDownloadCsv={handleAbcCsv}
+          onDownloadExcel={handleAbcExcel}
+          onDownloadPdf={handleAbcPdf}
           loading={loading}
         />
         <ReportCard
