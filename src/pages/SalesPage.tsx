@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Calendar } from 'lucide-react';
+import { Plus, Calendar, ShoppingCart, TrendingUp, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ import type { Sale, SaleForm } from '@/types/sale';
 import type { Warehouse } from '@/types/warehouse';
 import type { Product } from '@/types/product';
 
-const today = new Date().toISOString().split('T')[0];
+const today    = new Date().toISOString().split('T')[0];
 const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
 const emptyForm: SaleForm = {
@@ -40,57 +40,42 @@ export default function SalesPage() {
   const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading]       = useState(true);
 
-  // Фільтри
-  const [dateFrom, setDateFrom] = useState(monthAgo);
-  const [dateTo, setDateTo]     = useState(today);
-  const [page, setPage]         = useState(0);
+  const [dateFrom, setDateFrom]     = useState(monthAgo);
+  const [dateTo, setDateTo]         = useState(today);
+  const [page, setPage]             = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const PAGE_SIZE = 20;
 
-  // Форма
-  const [formOpen, setFormOpen] = useState(false);
-  const [form, setForm]         = useState<SaleForm>(emptyForm);
-  const [saving, setSaving]     = useState(false);
-  const [formError, setFormError] = useState('');
+  const [formOpen, setFormOpen]     = useState(false);
+  const [form, setForm]             = useState<SaleForm>(emptyForm);
+  const [saving, setSaving]         = useState(false);
+  const [formError, setFormError]   = useState('');
 
-  // Підрахунок підсумків
   const totalSum = sales.reduce((acc, s) => acc + Number(s.quantity) * Number(s.unitPrice), 0);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getSales(page, PAGE_SIZE, dateFrom, dateTo);
-      // Якщо бекенд повертає Page<> — беремо content і totalPages
       if (Array.isArray(data)) {
-        setSales(data);
-        setTotalPages(1);
+        setSales(data); setTotalPages(1);
       } else {
         setSales((data as any).content ?? []);
         setTotalPages((data as any).totalPages ?? 1);
       }
-    } catch {
-      setSales([]);
-    } finally {
-      setLoading(false);
-    }
+    } catch { setSales([]); }
+    finally { setLoading(false); }
   }, [page, dateFrom, dateTo]);
 
   useEffect(() => { load(); }, [load]);
 
   const openCreate = async () => {
-    setForm(emptyForm);
-    setFormError('');
+    setForm(emptyForm); setFormError('');
     try {
-      const [prods, warehs] = await Promise.all([
-        getProducts(0, 200),
-        getWarehouses(),
-      ]);
+      const [prods, warehs] = await Promise.all([getProducts(0, 200), getWarehouses()]);
       setProducts((prods as any).content ?? prods as any);
       setWarehouses(warehs);
-    } catch {
-      setProducts([]);
-      setWarehouses([]);
-    }
+    } catch { setProducts([]); setWarehouses([]); }
     setFormOpen(true);
   };
 
@@ -101,95 +86,112 @@ export default function SalesPage() {
   };
 
   const handleSave = async () => {
-    if (!form.productId || !form.warehouseId) {
-      setFormError('Оберіть товар та склад');
-      return;
-    }
-    if (form.quantity <= 0) {
-      setFormError('Кількість має бути більше 0');
-      return;
-    }
-    setSaving(true);
-    setFormError('');
+    if (!form.productId || !form.warehouseId) { setFormError('Оберіть товар та склад'); return; }
+    if (form.quantity <= 0) { setFormError('Кількість має бути більше 0'); return; }
+    setSaving(true); setFormError('');
     try {
       await createSale(form);
       setFormOpen(false);
       toast.success('Продаж зареєстровано. Залишок оновлено.');
-      setPage(0);
-      load();
+      setPage(0); load();
     } catch (e: any) {
-      if (e.response?.status === 400) {
-        setFormError('Недостатньо товару на складі');
-      } else {
-        setFormError(e.response?.data?.message || 'Помилка збереження');
-      }
-    } finally {
-      setSaving(false);
-    }
+      setFormError(e.response?.status === 400 ? 'Недостатньо товару на складі' : e.response?.data?.message || 'Помилка збереження');
+    } finally { setSaving(false); }
   };
 
   const rowSum = (s: Sale) => (Number(s.quantity) * Number(s.unitPrice)).toFixed(2);
 
   return (
-    <div className="space-y-4">
-      {/* Заголовок */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">Продажі</h1>
-          <p className="text-slate-500 text-sm">Реєстрація та перегляд продажів</p>
+    <div className="space-y-5">
+
+      {/* Header */}
+      <div className="rounded-lg overflow-hidden" style={{
+        background: 'linear-gradient(135deg, #0A1628 0%, #1E293B 60%, #0F1F35 100%)',
+        padding: '24px 28px',
+      }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-lg flex items-center justify-center"
+              style={{ background: 'linear-gradient(135deg, #15803D, #22C55E)' }}>
+              <ShoppingCart className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">Продажі</h1>
+              <p className="text-sm" style={{ color: '#64748B' }}>Реєстрація та перегляд продажів</p>
+            </div>
+          </div>
+          {canCreate && (
+            <button
+              onClick={openCreate}
+              className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
+              style={{
+                background: 'linear-gradient(135deg, #15803D, #22C55E)',
+                color: 'white', border: 'none', cursor: 'pointer',
+              }}
+            >
+              <Plus className="h-4 w-4" />
+              Зареєструвати продаж
+            </button>
+          )}
         </div>
-        {canCreate && (
-          <Button onClick={openCreate}>
-            <Plus className="h-4 w-4 mr-2" />
-            Зареєструвати продаж
-          </Button>
+
+        {/* Summary strip */}
+        {!loading && sales.length > 0 && (
+          <div className="flex gap-6 mt-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            <div>
+              <div className="text-xs mb-1" style={{ color: '#475569' }}>Записів за період</div>
+              <div className="text-xl font-bold text-white">{sales.length}</div>
+            </div>
+            <div>
+              <div className="text-xs mb-1" style={{ color: '#475569' }}>Загальна сума</div>
+              <div className="text-xl font-bold" style={{ color: '#4ADE80' }}>
+                {totalSum >= 1000 ? (totalSum / 1000).toFixed(1) + ' тис' : totalSum.toFixed(0)} грн
+              </div>
+            </div>
+            <div>
+              <div className="text-xs mb-1" style={{ color: '#475569' }}>Середній чек</div>
+              <div className="text-xl font-bold text-white">
+                {sales.length > 0 ? (totalSum / sales.length).toFixed(0) : 0} грн
+              </div>
+            </div>
+          </div>
         )}
       </div>
 
-      {/* Фільтри дат */}
-      <div className="flex flex-wrap gap-3 items-end p-4 bg-white border rounded-lg">
-        <Calendar className="h-4 w-4 text-slate-400 self-center" />
+      {/* Filters */}
+      <div className="flex flex-wrap gap-3 items-end p-4 bg-white border rounded-xl shadow-sm">
+        <div className="flex items-center gap-2 mr-1">
+          <Calendar className="h-4 w-4 text-slate-400" />
+          <span className="text-sm font-medium text-slate-600">Період:</span>
+        </div>
         <div>
-          <Label className="text-xs text-slate-500 mb-1 block">Від</Label>
-          <Input
-            type="date" value={dateFrom}
+          <Label className="text-xs text-slate-400 mb-1 block uppercase tracking-wide">Від</Label>
+          <Input type="date" value={dateFrom}
             onChange={e => { setDateFrom(e.target.value); setPage(0); }}
-            className="w-40"
-          />
+            className="w-40" />
         </div>
         <div>
-          <Label className="text-xs text-slate-500 mb-1 block">До</Label>
-          <Input
-            type="date" value={dateTo}
+          <Label className="text-xs text-slate-400 mb-1 block uppercase tracking-wide">До</Label>
+          <Input type="date" value={dateTo}
             onChange={e => { setDateTo(e.target.value); setPage(0); }}
-            className="w-40"
-          />
+            className="w-40" />
         </div>
-        <Button
-          variant="outline" size="sm"
-          onClick={() => { setDateFrom(monthAgo); setDateTo(today); setPage(0); }}
-        >
+        <Button variant="outline" size="sm"
+          onClick={() => { setDateFrom(monthAgo); setDateTo(today); setPage(0); }}>
           Скинути
         </Button>
-        {!loading && (
-          <span className="text-sm text-slate-500 self-center ml-auto">
-            {sales.length} записів · Сума: <strong>{totalSum.toFixed(2)} грн</strong>
-          </span>
-        )}
       </div>
 
-      {/* Таблиця */}
-      <div className="border rounded-lg overflow-hidden bg-white">
+      {/* Table */}
+      <div className="rounded-md border bg-white overflow-hidden shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b bg-slate-50">
-              <th className="text-left p-3 font-medium">Дата</th>
-              <th className="text-left p-3 font-medium">Товар</th>
-              <th className="text-left p-3 font-medium">Склад</th>
-              <th className="text-right p-3 font-medium">К-сть</th>
-              <th className="text-right p-3 font-medium">Ціна, грн</th>
-              <th className="text-right p-3 font-medium">Сума, грн</th>
-              <th className="text-left p-3 font-medium">Автор</th>
+            <tr className="border-b" style={{ background: '#F8FAFC' }}>
+              {['Дата', 'Товар', 'Склад', 'К-сть', 'Ціна, грн', 'Сума, грн', 'Автор'].map((h, i) => (
+                <th key={h} className={`px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400 ${i >= 3 && i <= 5 ? 'text-right' : 'text-left'}`}>
+                  {h}
+                </th>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -197,7 +199,7 @@ export default function SalesPage() {
               Array.from({ length: 6 }).map((_, i) => (
                 <tr key={i} className="border-b">
                   {Array.from({ length: 7 }).map((_, j) => (
-                    <td key={j} className="p-3"><Skeleton className="h-4 w-20" /></td>
+                    <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
                   ))}
                 </tr>
               ))
@@ -213,36 +215,56 @@ export default function SalesPage() {
                 </td>
               </tr>
             ) : sales.map((s, i) => (
-              <tr key={s.id} className={`border-b hover:bg-slate-50 ${i % 2 !== 0 ? 'bg-slate-50/40' : ''}`}>
-                <td className="p-3 text-slate-600">{s.saleDate}</td>
-                <td className="p-3 font-medium">{(s as any).productName ?? s.product?.name ?? '—'}</td>
-                <td className="p-3 text-slate-500">{(s as any).warehouseName ?? s.warehouse?.name ?? '—'}</td>
-                <td className="p-3 text-right">{s.quantity}</td>
-                <td className="p-3 text-right">{Number(s.unitPrice).toFixed(2)}</td>
-                <td className="p-3 text-right font-semibold">{rowSum(s)}</td>
-                <td className="p-3 text-slate-400 text-xs">{s.createdBy ?? '—'}</td>
+              <tr key={s.id}
+                className="border-b transition-colors hover:bg-green-50/20"
+                style={{ background: i % 2 !== 0 ? 'rgba(248,250,252,0.6)' : undefined }}>
+                <td className="px-4 py-3">
+                  <span className="text-slate-500 text-xs font-medium">{s.saleDate}</span>
+                </td>
+                <td className="px-4 py-3 font-semibold text-slate-800">
+                  {(s as any).productName ?? s.product?.name ?? '—'}
+                </td>
+                <td className="px-4 py-3">
+                  <span className="text-slate-500 text-xs bg-slate-100 px-2 py-0.5 rounded">
+                    {(s as any).warehouseName ?? s.warehouse?.name ?? '—'}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-right font-medium text-slate-700">{s.quantity}</td>
+                <td className="px-4 py-3 text-right text-slate-500">{Number(s.unitPrice).toFixed(2)}</td>
+                <td className="px-4 py-3 text-right">
+                  <span className="font-bold text-slate-800">{rowSum(s)}</span>
+                </td>
+                <td className="px-4 py-3 text-slate-400 text-xs">{s.createdBy ?? '—'}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
 
-      {/* Пагінація */}
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
-          <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>
-            ← Попередня
-          </Button>
-          <span className="text-sm text-slate-500">
-            Сторінка {page + 1} з {totalPages}
-          </span>
-          <Button variant="outline" size="sm" disabled={page >= totalPages - 1} onClick={() => setPage(p => p + 1)}>
-            Наступна →
-          </Button>
+          <button
+            disabled={page === 0}
+            onClick={() => setPage(p => p - 1)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all disabled:opacity-40"
+            style={{ cursor: page === 0 ? 'not-allowed' : 'pointer' }}
+          >
+            <ArrowLeft className="h-3.5 w-3.5" /> Попередня
+          </button>
+          <span className="text-sm text-slate-500 px-2">{page + 1} / {totalPages}</span>
+          <button
+            disabled={page >= totalPages - 1}
+            onClick={() => setPage(p => p + 1)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-all disabled:opacity-40"
+            style={{ cursor: page >= totalPages - 1 ? 'not-allowed' : 'pointer' }}
+          >
+            Наступна <ArrowRight className="h-3.5 w-3.5" />
+          </button>
         </div>
       )}
 
-      {/* Форма */}
+      {/* Form Dialog */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -250,87 +272,64 @@ export default function SalesPage() {
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div>
-              <Label className="mb-1 block">Товар *</Label>
-              <Select
-                value={form.productId ? String(form.productId) : ''}
-                onValueChange={handleProductChange}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Оберіть товар..." />
-                </SelectTrigger>
+              <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">Товар *</Label>
+              <Select value={form.productId ? String(form.productId) : ''} onValueChange={handleProductChange}>
+                <SelectTrigger><SelectValue placeholder="Оберіть товар..." /></SelectTrigger>
                 <SelectContent>
-                  {products.map(p => (
-                    <SelectItem key={p.id} value={String(p.id)}>
-                      {p.name} ({p.sku})
-                    </SelectItem>
-                  ))}
+                  {products.map(p => <SelectItem key={p.id} value={String(p.id)}>{p.name} ({p.sku})</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label className="mb-1 block">Склад *</Label>
-              <Select
-                value={form.warehouseId ? String(form.warehouseId) : ''}
-                onValueChange={val => setForm(f => ({ ...f, warehouseId: Number(val) }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Оберіть склад..." />
-                </SelectTrigger>
+              <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">Склад *</Label>
+              <Select value={form.warehouseId ? String(form.warehouseId) : ''}
+                onValueChange={val => setForm(f => ({ ...f, warehouseId: Number(val) }))}>
+                <SelectTrigger><SelectValue placeholder="Оберіть склад..." /></SelectTrigger>
                 <SelectContent>
-                  {warehouses.map(w => (
-                    <SelectItem key={w.id} value={String(w.id)}>
-                      {w.name}
-                    </SelectItem>
-                  ))}
+                  {warehouses.map(w => <SelectItem key={w.id} value={String(w.id)}>{w.name}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="mb-1 block">Кількість *</Label>
-                <Input
-                  type="number" min={1}
-                  value={form.quantity}
-                  onChange={e => setForm(f => ({ ...f, quantity: parseInt(e.target.value) || 1 }))}
-                />
+                <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">Кількість *</Label>
+                <Input type="number" min={1} value={form.quantity}
+                  onChange={e => setForm(f => ({ ...f, quantity: parseInt(e.target.value) || 1 }))} />
               </div>
               <div>
-                <Label className="mb-1 block">Ціна (грн)</Label>
-                <Input
-                  type="number" min={0} step={0.01}
-                  value={form.unitPrice}
-                  onChange={e => setForm(f => ({ ...f, unitPrice: parseFloat(e.target.value) || 0 }))}
-                />
+                <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">Ціна (грн)</Label>
+                <Input type="number" min={0} step={0.01} value={form.unitPrice}
+                  onChange={e => setForm(f => ({ ...f, unitPrice: parseFloat(e.target.value) || 0 }))} />
               </div>
             </div>
 
             <div>
-              <Label className="mb-1 block">Дата продажу</Label>
-              <Input
-                type="date" value={form.saleDate}
-                onChange={e => setForm(f => ({ ...f, saleDate: e.target.value }))}
-              />
+              <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">Дата продажу</Label>
+              <Input type="date" value={form.saleDate}
+                onChange={e => setForm(f => ({ ...f, saleDate: e.target.value }))} />
             </div>
 
             {form.quantity > 0 && form.unitPrice > 0 && (
-              <div className="rounded-md bg-blue-50 px-3 py-2.5 border border-blue-100">
-                <p className="text-sm text-blue-800">
-                  Сума до списання:{' '}
-                  <span className="font-bold">{(form.quantity * form.unitPrice).toFixed(2)} грн</span>
+              <div className="rounded bg-green-50 border border-green-200 px-3 py-2.5">
+                <p className="text-sm text-green-800">
+                  Сума до списання: <span className="font-bold">{(form.quantity * form.unitPrice).toFixed(2)} грн</span>
                 </p>
               </div>
             )}
 
-            {formError && <p className="text-sm text-red-600">{formError}</p>}
+            {formError && (
+              <div className="rounded bg-red-50 border border-red-200 px-3 py-2">
+                <p className="text-sm text-red-600">{formError}</p>
+              </div>
+            )}
           </div>
 
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setFormOpen(false)} disabled={saving}>
-              Скасувати
-            </Button>
-            <Button onClick={handleSave} disabled={saving}>
+            <Button variant="outline" onClick={() => setFormOpen(false)} disabled={saving}>Скасувати</Button>
+            <Button onClick={handleSave} disabled={saving}
+              style={{ background: 'linear-gradient(135deg, #15803D, #22C55E)', border: 'none' }}>
               {saving ? 'Збереження...' : 'Зареєструвати'}
             </Button>
           </DialogFooter>

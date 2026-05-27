@@ -45,7 +45,7 @@ export default function AbcPieChart({ items }: { items: any[] }) {
   };
 
   return (
-    <Card>
+    <Card style={{ borderRadius: '6px' }}>
       <CardHeader><CardTitle>ABC-розподіл товарів</CardTitle></CardHeader>
       <CardContent className="flex justify-center">
         <div style={{ width: 280, height: 280 }}>

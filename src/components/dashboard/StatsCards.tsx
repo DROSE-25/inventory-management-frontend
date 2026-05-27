@@ -1,5 +1,4 @@
-import { Package, AlertTriangle, TrendingUp, DollarSign } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Boxes, AlertOctagon, LineChart, Banknote } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface Props {
@@ -24,65 +23,64 @@ export default function StatsCards({
       title: 'Товарів у каталозі',
       value: totalProducts,
       suffix: 'позицій',
-      icon: Package,
-      iconBg: 'bg-blue-50',
-      iconColor: 'text-blue-600',
-      valueColor: 'text-blue-700',
+      icon: Boxes,
+      iconBg: '#2563EB',
+      valueColor: '#1E40AF',
     },
     {
       title: 'Нижче точки ROP',
       value: reorderCount,
       suffix: reorderCount === 1 ? 'товар' : 'товарів',
-      icon: AlertTriangle,
-      iconBg: 'bg-orange-50',
-      iconColor: 'text-orange-500',
-      valueColor: reorderCount > 0 ? 'text-orange-600' : 'text-green-600',
+      icon: AlertOctagon,
+      iconBg: reorderCount > 0 ? '#EA580C' : '#16A34A',
+      valueColor: reorderCount > 0 ? '#C2410C' : '#15803D',
     },
     {
-      title: 'Прогноз продажів / міс',
+      title: 'Прогноз / міс',
       value: formatCurrency(forecastedSales),
       suffix: 'грн',
-      icon: TrendingUp,
-      iconBg: 'bg-green-50',
-      iconColor: 'text-green-600',
-      valueColor: 'text-green-700',
+      icon: LineChart,
+      iconBg: '#16A34A',
+      valueColor: '#15803D',
     },
     {
       title: 'Загальний оборот',
       value: formatCurrency(totalRevenue),
       suffix: 'грн',
-      icon: DollarSign,
-      iconBg: 'bg-purple-50',
-      iconColor: 'text-purple-600',
-      valueColor: 'text-purple-700',
+      icon: Banknote,
+      iconBg: '#7C3AED',
+      valueColor: '#6D28D9',
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {stats.map((stat) => (
-        <Card key={stat.title} className="hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-slate-500">
-              {stat.title}
-            </CardTitle>
-            <div className={`p-2 rounded-lg ${stat.iconBg}`}>
-              <stat.icon className={`h-4 w-4 ${stat.iconColor}`} />
+        <div
+          key={stat.title}
+          className="rounded-md p-5 bg-white transition-all hover:shadow-md"
+          style={{ border: '1px solid #E2E8F0' }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm font-medium text-slate-500">{stat.title}</p>
+            <div
+              className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+              style={{ background: stat.iconBg }}
+            >
+              <stat.icon className="h-[18px] w-[18px] text-white" strokeWidth={1.8} />
             </div>
-          </CardHeader>
-          <CardContent>
-            {loading ? (
-              <Skeleton className="h-8 w-24" />
-            ) : (
-              <div>
-                <span className={`text-3xl font-bold ${stat.valueColor}`}>
-                  {stat.value}
-                </span>
-                <span className="text-sm text-slate-400 ml-1">{stat.suffix}</span>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          </div>
+          {loading ? (
+            <Skeleton className="h-9 w-28" />
+          ) : (
+            <div className="flex items-end gap-1.5">
+              <span className="text-3xl font-bold tracking-tight" style={{ color: stat.valueColor }}>
+                {stat.value}
+              </span>
+              <span className="text-sm text-slate-400 mb-0.5">{stat.suffix}</span>
+            </div>
+          )}
+        </div>
       ))}
     </div>
   );
