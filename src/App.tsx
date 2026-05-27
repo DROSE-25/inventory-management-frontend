@@ -6,18 +6,10 @@ import SuppliersPage from '@/pages/SuppliersPage';
 import ForecastsPage from '@/pages/ForecastsPage';
 import WarehousesPage from '@/pages/WarehousesPage';
 import SalesPage from '@/pages/SalesPage';
-import UsersPage from '@/pages/UsersPage'; // Додано
+import UsersPage from '@/pages/UsersPage';
+import ReportsPage from '@/pages/ReportsPage';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PrivateRoute from '@/components/PrivateRoute';
-import ReportsPage from '@/pages/ReportsPage';
-
-// Заглушки для майбутніх сторінок
-const Placeholder = ({ title }: { title: string }) => (
-  <div>
-    <h1 className="text-2xl font-bold">{title}</h1>
-    <p className="text-slate-500 mt-2">Сторінка буде реалізована у наступних днях.</p>
-  </div>
-);
 
 function App() {
   return (
@@ -38,16 +30,14 @@ function App() {
           <Route path="/sales"      element={<SalesPage />} />
           <Route path="/warehouses" element={<WarehousesPage />} />
           <Route path="/forecasts"  element={<ForecastsPage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          
-          {/* Додано маршрут для користувачів з перевіркою ролі */}
-          <Route 
-            path="/users" 
+          <Route path="/reports"    element={<ReportsPage />} />
+          <Route
+            path="/users"
             element={
               <PrivateRoute requiredRole="ROLE_ADMIN">
                 <UsersPage />
               </PrivateRoute>
-            } 
+            }
           />
         </Route>
 

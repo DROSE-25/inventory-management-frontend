@@ -15,3 +15,7 @@ export const updateWarehouse = async (id: number, data: WarehouseForm): Promise<
   const res = await apiClient.put(`/warehouses/${id}`, data);
   return res.data;
 };
+
+export const deleteWarehouse = async (id: number): Promise<void> => {
+  await apiClient.delete(`/warehouses/${id}`);
+};

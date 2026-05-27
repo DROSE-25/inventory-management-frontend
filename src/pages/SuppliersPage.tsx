@@ -20,8 +20,8 @@ import {
 import type { Supplier, SupplierForm } from '@/types/supplier';
 
 const emptyForm: SupplierForm = {
-  name: '', contactEmail: '', contactPhone: '',
-  leadTimeDays: 7, orderingCost: 0,
+  name: '', contactPerson: '', email: '', phone: '',
+  leadTimeDays: 7, minOrderAmount: 0,
 };
 
 export default function SuppliersPage() {
@@ -64,10 +64,11 @@ export default function SuppliersPage() {
     setEditItem(s);
     setForm({
       name: s.name,
-      contactEmail: s.contactEmail,
-      contactPhone: s.contactPhone,
+      contactPerson: s.contactPerson ?? '',
+      email: s.email ?? '',
+      phone: s.phone ?? '',
       leadTimeDays: s.leadTimeDays,
-      orderingCost: s.orderingCost,
+      minOrderAmount: s.minOrderAmount ?? 0,
     });
     setFormError('');
     setFormOpen(true);
@@ -140,62 +141,61 @@ export default function SuppliersPage() {
             </tr>
           </thead>
           <tbody>
-          {loading ? (
-  Array.from({ length: 5 }).map((_, i) => (
-    <tr key={i} className="border-b">
-      <td className="p-3"><Skeleton className="h-4 w-32" /></td>
-      <td className="p-3"><Skeleton className="h-4 w-32" /></td>
-      <td className="p-3"><Skeleton className="h-4 w-24" /></td>
-      <td className="p-3"><Skeleton className="h-4 w-12" /></td>
-      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
-      <td className="p-3"><Skeleton className="h-4 w-16" /></td>
-      {isAdmin && <td className="p-3"><Skeleton className="h-4 w-16" /></td>}
-    </tr>
-  ))
-) : suppliers.length === 0 ? (
-  <tr>
-    <td colSpan={isAdmin ? 7 : 6}>
-      <EmptyState
-        title="Постачальників не знайдено"
-        description="Додайте першого постачальника"
-        actionLabel={isAdmin ? "Додати постачальника" : undefined}
-        onAction={isAdmin ? openCreate : undefined}
-      />
-    </td>
-  </tr>
-) : suppliers.map((s, i) => (
-  <tr key={s.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
-    <td className="p-3 font-medium">{s.name}</td>
-    <td className="p-3 text-slate-500">{s.contactEmail || '—'}</td>
-    <td className="p-3 text-slate-500">{s.contactPhone || '—'}</td>
-    <td className="p-3 text-right">{s.leadTimeDays} дн.</td>
-    <td className="p-3 text-right">{s.orderingCost?.toFixed(2)} грн</td>
-    <td className="p-3 text-center">
-      <Badge variant={s.isActive ? 'default' : 'secondary'}>
-        {s.isActive ? 'Активний' : 'Неактивний'}
-      </Badge>
-    </td>
-    {isAdmin && (
-      <td className="p-3">
-        <div className="flex justify-center gap-2">
-          <Button size="sm" variant="outline" onClick={() => openEdit(s)}>
-            <Pencil className="h-3 w-3" />
-          </Button>
-          <Button size="sm" variant="outline"
-            className="text-red-600 hover:text-red-700 hover:border-red-300"
-            onClick={() => setDeleteId(s.id)}>
-            <Trash2 className="h-3 w-3" />
-          </Button>
-        </div>
-      </td>
-    )}
-  </tr>
-))}
-        </tbody>
-      </table>
-    </div>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <tr key={i} className="border-b">
+                  <td className="p-3"><Skeleton className="h-4 w-32" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-32" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-24" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-12" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+                  <td className="p-3"><Skeleton className="h-4 w-16" /></td>
+                  {isAdmin && <td className="p-3"><Skeleton className="h-4 w-16" /></td>}
+                </tr>
+              ))
+            ) : suppliers.length === 0 ? (
+              <tr>
+                <td colSpan={isAdmin ? 7 : 6}>
+                  <EmptyState
+                    title="Постачальників не знайдено"
+                    description="Додайте першого постачальника"
+                    actionLabel={isAdmin ? 'Додати постачальника' : undefined}
+                    onAction={isAdmin ? openCreate : undefined}
+                  />
+                </td>
+              </tr>
+            ) : suppliers.map((s, i) => (
+              <tr key={s.id} className={`border-b hover:bg-slate-50 ${i % 2 === 0 ? '' : 'bg-slate-50/50'}`}>
+                <td className="p-3 font-medium">{s.name}</td>
+                <td className="p-3 text-slate-500">{s.email || '—'}</td>
+                <td className="p-3 text-slate-500">{s.phone || '—'}</td>
+                <td className="p-3 text-right">{s.leadTimeDays} дн.</td>
+                <td className="p-3 text-right">{s.minOrderAmount?.toFixed(2) ?? '—'} грн</td>
+                <td className="p-3 text-center">
+                  <Badge variant={s.isActive ? 'default' : 'secondary'}>
+                    {s.isActive ? 'Активний' : 'Неактивний'}
+                  </Badge>
+                </td>
+                {isAdmin && (
+                  <td className="p-3">
+                    <div className="flex justify-center gap-2">
+                      <Button size="sm" variant="outline" onClick={() => openEdit(s)}>
+                        <Pencil className="h-3 w-3" />
+                      </Button>
+                      <Button size="sm" variant="outline"
+                        className="text-red-600 hover:text-red-700 hover:border-red-300"
+                        onClick={() => setDeleteId(s.id)}>
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </td>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-      {/* Форма */}
       <Dialog open={formOpen} onOpenChange={setFormOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -211,17 +211,23 @@ export default function SuppliersPage() {
                 onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                 placeholder="ТОВ Постачальник" />
             </div>
+            <div>
+              <Label>Контактна особа</Label>
+              <Input value={form.contactPerson}
+                onChange={e => setForm(f => ({ ...f, contactPerson: e.target.value }))}
+                placeholder="Іванов Іван" />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Email</Label>
-                <Input type="email" value={form.contactEmail}
-                  onChange={e => setForm(f => ({ ...f, contactEmail: e.target.value }))}
+                <Input type="email" value={form.email}
+                  onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
                   placeholder="info@supplier.com" />
               </div>
               <div>
                 <Label>Телефон</Label>
-                <Input value={form.contactPhone}
-                  onChange={e => setForm(f => ({ ...f, contactPhone: e.target.value }))}
+                <Input value={form.phone}
+                  onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
                   placeholder="+380..." />
               </div>
             </div>
@@ -233,10 +239,10 @@ export default function SuppliersPage() {
                   onChange={e => setForm(f => ({ ...f, leadTimeDays: parseInt(e.target.value) || 1 }))} />
               </div>
               <div>
-                <Label>Вартість замовлення</Label>
+                <Label>Мін. сума замовлення</Label>
                 <Input type="number" min={0} step={0.01}
-                  value={form.orderingCost}
-                  onChange={e => setForm(f => ({ ...f, orderingCost: parseFloat(e.target.value) || 0 }))} />
+                  value={form.minOrderAmount}
+                  onChange={e => setForm(f => ({ ...f, minOrderAmount: parseFloat(e.target.value) || 0 }))} />
               </div>
             </div>
             {formError && <p className="text-sm text-red-600">{formError}</p>}

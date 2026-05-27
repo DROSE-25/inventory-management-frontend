@@ -1,17 +1,19 @@
 export interface Supplier {
   id: number;
   name: string;
-  contactEmail: string;
-  contactPhone: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
   leadTimeDays: number;
-  orderingCost: number;
+  minOrderAmount: number;
   isActive: boolean;
 }
 
 export interface SupplierForm {
   name: string;
-  contactEmail: string;
-  contactPhone: string;
+  contactPerson: string;
+  email: string;
+  phone: string;
   leadTimeDays: number;
-  orderingCost: number;
+  minOrderAmount: number;
 }

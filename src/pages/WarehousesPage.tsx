@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Pencil } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import toast from 'react-hot-toast';
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/store/authStore';
-import { getWarehouses, createWarehouse, updateWarehouse } from '@/api/warehouses';
+import { getWarehouses, createWarehouse, updateWarehouse, deleteWarehouse } from '@/api/warehouses';
 import type { Warehouse, WarehouseForm } from '@/types/warehouse';
 
 const emptyForm: WarehouseForm = { name: '', address: '', capacity: 0 };
@@ -80,6 +80,17 @@ export default function WarehousesPage() {
     }
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm('Видалити склад?')) return;
+    try {
+      await deleteWarehouse(id);
+      toast.success('Склад видалено');
+      load();
+    } catch (e: any) {
+      toast.error(e.response?.data?.message ?? 'Помилка видалення');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -142,6 +153,11 @@ export default function WarehousesPage() {
       <td className="p-3 text-center">
         <Button size="sm" variant="outline" onClick={() => openEdit(w)}>
           <Pencil className="h-3 w-3" />
+        </Button>
+        <Button size="sm" variant="ghost"
+          className="text-red-500 hover:text-red-700 ml-1"
+          onClick={() => handleDelete(w.id)}>
+          <Trash2 className="h-4 w-4" />
         </Button>
       </td>
     )}
