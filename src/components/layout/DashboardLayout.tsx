@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { apiClient } from '@/api/client';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
 import {
@@ -64,8 +65,26 @@ export default function DashboardLayout() {
   const navigate  = useNavigate();
   const location  = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [reorderCount, setReorderCount] = useState(0);
 
   const isAdmin      = user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN';
+
+  useEffect(() => {
+    apiClient.get('/optimization/reorder-alerts')
+      .then(r => {
+        const arr = Array.isArray(r.data) ? r.data : r.data.content ?? [];
+        setReorderCount(arr.length);
+      })
+      .catch(() => {});
+    const interval = setInterval(() => {
+      apiClient.get('/optimization/reorder-alerts')
+        .then(r => {
+          const arr = Array.isArray(r.data) ? r.data : r.data.content ?? [];
+          setReorderCount(arr.length);
+        }).catch(() => {});
+    }, 60000); // refresh every minute
+    return () => clearInterval(interval);
+  }, []);
   const currentLabel = PAGE_LABELS[location.pathname] ?? '';
   const visibleItems = NAV_ITEMS.filter(item => !item.adminOnly || isAdmin);
   const roleGradient = ROLE_GRADIENT[user?.role ?? ''] ?? 'linear-gradient(135deg, #475569, #94A3B8)';
@@ -179,12 +198,30 @@ export default function DashboardLayout() {
                       flexShrink: 0,
                       background: isActive ? `${accent}25` : 'transparent',
                       transition: 'background 0.15s',
+                      position: 'relative',
                     }}>
                       <Icon
                         size={17}
                         color={isActive ? accent : '#64748B'}
                         style={{ transition: 'color 0.15s' }}
                       />
+                      {to === '/dashboard' && reorderCount > 0 && (
+                        <div style={{
+                          position: 'absolute',
+                          top: '0px', right: '0px',
+                          width: '16px', height: '16px',
+                          borderRadius: '50%',
+                          background: '#EF4444',
+                          color: 'white',
+                          fontSize: '9px',
+                          fontWeight: '700',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          border: '1.5px solid #0F172A',
+                          lineHeight: 1,
+                        }}>
+                          {reorderCount > 9 ? '9+' : reorderCount}
+                        </div>
+                      )}
                     </div>
 
                     {/* Label */}

@@ -17,3 +17,6 @@ export const createSale = async (data: SaleForm): Promise<Sale> => {
   const res = await apiClient.post('/sales', data);
   return res.data;
 };
+export const deleteSale = async (id: number): Promise<void> => {
+  await apiClient.delete(`/sales/${id}`);
+};

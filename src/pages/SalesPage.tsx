@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { Plus, Calendar, ShoppingCart, ArrowLeft, ArrowRight, BarChart2 } from 'lucide-react';
+import { Plus, Calendar, ShoppingCart, ArrowLeft, ArrowRight, BarChart2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,7 +17,7 @@ import {
 
 import { useAuthStore } from '@/store/authStore';
 import SvgChart from '@/components/dashboard/SvgChart';
-import { getSales, createSale } from '@/api/sales';
+import { getSales, createSale, deleteSale } from '@/api/sales';
 import { getWarehouses } from '@/api/warehouses';
 import { getProducts } from '@/api/products';
 import type { Sale, SaleForm } from '@/types/sale';
@@ -197,6 +197,17 @@ export default function SalesPage() {
     } finally { setSaving(false); }
   };
 
+  const handleDelete = async (id: number) => {
+    if (!confirm('Видалити цей продаж? Товар буде повернуто на склад.')) return;
+    try {
+      await deleteSale(id);
+      toast.success('Продаж видалено, залишок відновлено');
+      load(); loadChart();
+    } catch {
+      toast.error('Помилка видалення');
+    }
+  };
+
   const rowSum = (s: Sale) => (Number(s.quantity) * Number(s.unitPrice)).toFixed(2);
 
   const formatYAxis = (v: number) =>
@@ -347,7 +358,7 @@ export default function SalesPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b" style={{ background: '#F8FAFC' }}>
-              {['Дата', 'Товар', 'Склад', 'К-сть', 'Ціна, грн', 'Сума, грн', 'Автор'].map((h, i) => (
+              {['Дата', 'Товар', 'Склад', 'К-сть', 'Ціна, грн', 'Сума, грн', 'Автор', ''].map((h, i) => (
                 <th key={h} className={`px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400 ${i >= 3 && i <= 5 ? 'text-right' : 'text-left'}`}>
                   {h}
                 </th>
@@ -400,6 +411,16 @@ export default function SalesPage() {
                   <span className="font-bold text-slate-800">{rowSum(s)}</span>
                 </td>
                 <td className="px-4 py-3 text-slate-400 text-xs">{s.createdBy ?? '—'}</td>
+                {canCreate && (
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => handleDelete(s.id)}
+                      className="w-7 h-7 rounded border border-slate-200 flex items-center justify-center text-slate-300 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all mx-auto"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  </td>
+                )}
               </tr>
             ))}
           </tbody>

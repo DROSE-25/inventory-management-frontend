@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { Package, TrendingUp, TrendingDown, Minus, Loader2, AlertCircle, ChevronDown, ChevronUp, ShoppingCart, Calendar, Target, Download } from 'lucide-react';
+import { Package, TrendingUp, TrendingDown, Minus, Loader2, AlertCircle, ChevronDown, ChevronUp, ShoppingCart, Calendar, Target, Download, FileSpreadsheet, FileText } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getProducts, compareMethods } from '@/api/forecast';
 import { apiClient } from '@/api/client';
@@ -84,6 +84,7 @@ export default function ForecastsPage() {
   const [prevMonthSales, setPrevMonthSales] = useState<number | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
   const [saved, setSaved] = useState(false);
+  const [exportLoading, setExportLoading] = useState<'excel'|'pdf'|null>(null);
 
   useEffect(() => {
     getProducts().then(setProducts).catch(console.error);
@@ -167,6 +168,32 @@ export default function ForecastsPage() {
   const sorted = result ? [...result.results].sort((a, b) => a.mape - b.mape) : [];
 
   // Save report as text file
+  const handleExportExcel = async () => {
+    setExportLoading('excel');
+    try {
+      const res = await apiClient.get('/forecast-export/excel/reorder', { responseType: 'blob' });
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reorder_alerts_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch { } finally { setExportLoading(null); }
+  };
+
+  const handleExportPdf = async () => {
+    setExportLoading('pdf');
+    try {
+      const res = await apiClient.get('/forecast-export/pdf/reorder', { responseType: 'blob' });
+      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `reorder_alerts_${new Date().toISOString().split('T')[0]}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch { } finally { setExportLoading(null); }
+  };
+
   const handleSaveReport = () => {
     if (!result || !insights) return;
     const lines = [
@@ -388,25 +415,29 @@ export default function ForecastsPage() {
                 </div>
               </div>
               {/* Save report button */}
-              <button
-                onClick={handleSaveReport}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium shrink-0 transition-all"
-                style={{
-                  background: saved ? 'rgba(74,222,128,0.25)' : 'rgba(255,255,255,0.15)',
-                  color: 'white',
-                  border: saved ? '1px solid rgba(74,222,128,0.5)' : '1px solid rgba(255,255,255,0.25)',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  transition: 'all 0.3s',
-                }}
-                onMouseEnter={e => { if (!saved) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.25)'; }}
-                onMouseLeave={e => { if (!saved) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.15)'; }}
-              >
-                {saved
-                  ? <><span>✓</span> Збережено!</>
-                  : <><Download className="h-4 w-4" /> Зберегти звіт</>
-                }
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                <button onClick={handleExportExcel} disabled={exportLoading !== null}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{ background: 'rgba(21,128,61,0.2)', color: 'white', border: '1px solid rgba(74,222,128,0.3)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  {exportLoading === 'excel' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}
+                  Excel
+                </button>
+                <button onClick={handleExportPdf} disabled={exportLoading !== null}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{ background: 'rgba(220,38,38,0.2)', color: 'white', border: '1px solid rgba(248,113,113,0.3)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  {exportLoading === 'pdf' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
+                  PDF
+                </button>
+                <button onClick={handleSaveReport}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+                  style={{
+                    background: saved ? 'rgba(74,222,128,0.25)' : 'rgba(255,255,255,0.15)',
+                    color: 'white', border: saved ? '1px solid rgba(74,222,128,0.5)' : '1px solid rgba(255,255,255,0.25)',
+                    cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.3s',
+                  }}>
+                  {saved ? <><span>✓</span> Збережено!</> : <><Download className="h-3.5 w-3.5" /> TXT</>}
+                </button>
+              </div>
             </div>
           </div>
 
@@ -498,3 +529,4 @@ export default function ForecastsPage() {
     </div>
   );
 }
+

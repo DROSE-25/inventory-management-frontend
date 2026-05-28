@@ -59,42 +59,17 @@ export default function WarehousesPage() {
     setStockOpen(true);
     setStockLoading(true);
     try {
-      // Get all stock levels and filter by warehouse
-      const res = await apiClient.get('/stock/below-reorder-point');
-      const belowRop: StockItem[] = (Array.isArray(res.data) ? res.data : res.data.content ?? [])
-        .filter((s: any) => s.warehouseId === w.id)
+      const res = await apiClient.get(`/stock/warehouse/${w.id}`);
+      const data: StockItem[] = (Array.isArray(res.data) ? res.data : res.data.content ?? [])
         .map((s: any) => ({
           productId: s.productId,
           productName: s.productName,
           productSku: s.productSku,
           quantity: Number(s.quantity),
-          reorderPoint: Number(s.reorderPoint),
-          belowReorderPoint: true,
+          reorderPoint: Number(s.reorderPoint ?? 0),
+          belowReorderPoint: s.belowReorderPoint ?? false,
         }));
-
-      // Also get all products to fetch their stock on this warehouse
-      const productsRes = await apiClient.get('/products', { params: { page: 0, size: 200 } });
-      const allProducts = productsRes.data.content ?? productsRes.data ?? [];
-
-      // Fetch stock for each product on this warehouse
-      const stockPromises = allProducts.map(async (p: any) => {
-        try {
-          const r = await apiClient.get(`/stock/product/${p.id}/warehouse/${w.id}`);
-          return {
-            productId: p.id,
-            productName: p.name,
-            productSku: p.sku,
-            quantity: Number(r.data?.quantity ?? 0),
-            reorderPoint: Number(r.data?.reorderPoint ?? 0),
-            belowReorderPoint: r.data?.belowReorderPoint ?? false,
-          };
-        } catch { return null; }
-      });
-
-      const results = (await Promise.all(stockPromises))
-        .filter((s): s is StockItem => s !== null && s.quantity > 0);
-
-      setStockItems(results.sort((a, b) => b.quantity - a.quantity));
+      setStockItems(data);
     } catch {
       setStockItems([]);
     } finally {

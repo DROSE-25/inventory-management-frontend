@@ -197,6 +197,23 @@ export default function ProductsPage() {
         )}
       </div>
 
+      {/* Counter */}
+      <div className="flex items-center justify-between px-1">
+        <p className="text-sm text-slate-500">
+          Показано <span className="font-semibold text-slate-800">{filteredProducts.length}</span>
+          {(filterCategory || filterSupplier || search) && (
+            <span className="text-slate-400"> з {products.length}</span>
+          )} товарів
+        </p>
+        {(filterCategory || filterSupplier || search) && (
+          <p className="text-xs text-slate-400">
+            {filterCategory && <span className="mr-2">📂 {filterCategory}</span>}
+            {filterSupplier && <span className="mr-2">🏭 {filterSupplier}</span>}
+            {search && <span>🔍 "{search}"</span>}
+          </p>
+        )}
+      </div>
+
       {/* Table */}
       <div className="rounded-md border bg-white overflow-hidden shadow-sm">
         <table className="w-full text-sm">
@@ -409,3 +426,4 @@ export default function ProductsPage() {
     </div>
   );
 }
+
