@@ -8,6 +8,7 @@ import WarehousesPage from '@/pages/WarehousesPage';
 import SalesPage from '@/pages/SalesPage';
 import UsersPage from '@/pages/UsersPage';
 import ReportsPage from '@/pages/ReportsPage';
+import HelpPage from '@/pages/HelpPage';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import PrivateRoute from '@/components/PrivateRoute';
 
@@ -31,6 +32,7 @@ function App() {
           <Route path="/warehouses" element={<WarehousesPage />} />
           <Route path="/forecasts"  element={<ForecastsPage />} />
           <Route path="/reports"    element={<ReportsPage />} />
+          <Route path="/help"       element={<HelpPage />} />
           <Route
             path="/users"
             element={

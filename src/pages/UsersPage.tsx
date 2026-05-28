@@ -210,21 +210,29 @@ export default function UsersPage() {
 
                   {/* Actions */}
                   <td className="px-4 py-3 text-center">
-                    <button
-                      onClick={() => handleToggle(u)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border text-xs font-medium transition-all"
-                      style={{
-                        background: u.isActive ? 'rgba(220,38,38,0.06)' : 'rgba(21,128,61,0.06)',
-                        border: u.isActive ? '1px solid rgba(220,38,38,0.2)' : '1px solid rgba(21,128,61,0.2)',
-                        color: u.isActive ? '#DC2626' : '#15803D',
-                        cursor: 'pointer',
-                      }}
-                    >
-                      {u.isActive
-                        ? <><UserX className="h-3 w-3" />Деактивувати</>
-                        : <><UserCheck className="h-3 w-3" />Активувати</>
-                      }
-                    </button>
+                    {u.role?.includes('ADMIN') ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border text-xs font-medium"
+                        style={{ background: 'rgba(100,116,139,0.06)', border: '1px solid rgba(100,116,139,0.15)', color: '#94A3B8' }}>
+                        <Shield className="h-3 w-3" />
+                        Захищений
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => handleToggle(u)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded border text-xs font-medium transition-all"
+                        style={{
+                          background: u.isActive ? 'rgba(220,38,38,0.06)' : 'rgba(21,128,61,0.06)',
+                          border: u.isActive ? '1px solid rgba(220,38,38,0.2)' : '1px solid rgba(21,128,61,0.2)',
+                          color: u.isActive ? '#DC2626' : '#15803D',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {u.isActive
+                          ? <><UserX className="h-3 w-3" />Деактивувати</>
+                          : <><UserCheck className="h-3 w-3" />Активувати</>
+                        }
+                      </button>
+                    )}
                   </td>
                 </tr>
               );

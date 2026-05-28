@@ -1,7 +1,47 @@
-import { AlertTriangle, CheckCircle2, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, XCircle, HelpCircle, ShoppingCart } from 'lucide-react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { ReorderItem } from '@/types/dashboard';
 
+function Tooltip({ text, align = 'center' }: { text: string; align?: 'center' | 'right' }) {
+  const [show, setShow] = useState(false);
+  const leftStyle = align === 'right'
+    ? { right: '0', left: 'auto', transform: 'none' }
+    : { left: '50%', transform: 'translateX(-50%)' };
+  const arrowStyle = align === 'right'
+    ? { right: '8px', left: 'auto', transform: 'none' }
+    : { left: '50%', transform: 'translateX(-50%)' };
+
+  return (
+    <span
+      className="relative inline-flex items-center ml-1"
+      style={{ verticalAlign: 'middle' }}
+      onMouseEnter={() => setShow(true)}
+      onMouseLeave={() => setShow(false)}
+    >
+      <HelpCircle className="h-3 w-3 text-slate-300 cursor-help hover:text-slate-500 transition-colors" />
+      {show && (
+        <span style={{
+          position: 'absolute', top: '120%', ...leftStyle,
+          background: '#1E293B', color: 'white', fontSize: '11px', padding: '6px 10px',
+          borderRadius: '6px', zIndex: 50, lineHeight: '1.5',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.2)', width: '220px', textAlign: 'left',
+          fontWeight: 'normal', textTransform: 'none', letterSpacing: 'normal',
+        }}>
+          {text}
+          <span style={{
+            position: 'absolute', bottom: '100%', ...arrowStyle,
+            borderWidth: '4px', borderStyle: 'solid',
+            borderColor: 'transparent transparent #1E293B transparent',
+          }} />
+        </span>
+      )}
+    </span>
+  );
+}
+
 export default function ReorderTable({ items }: { items: ReorderItem[] }) {
+  const navigate = useNavigate();
   if (items.length === 0) {
     return (
       <div className="rounded-md border bg-white p-6 h-full flex flex-col">
@@ -36,10 +76,17 @@ export default function ReorderTable({ items }: { items: ReorderItem[] }) {
           <thead>
             <tr className="border-b bg-slate-50">
               <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Товар</th>
-              <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">SKU</th>
+              <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Арт.</th>
+              <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Склад</th>
               <th className="text-right px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Залишок</th>
-              <th className="text-right px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">ROP</th>
-              <th className="text-right px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">EOQ</th>
+              <th className="text-right px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">
+                ROP
+                <Tooltip text="Точка перезамовлення – мінімальний залишок при якому треба робити нове замовлення" align="right" />
+              </th>
+              <th className="text-right px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">
+                EOQ
+                <Tooltip text="Оптимальна кількість для замовлення – найвигідніший розмір партії з урахуванням вартості замовлення і зберігання" align="right" />
+              </th>
               <th className="text-left px-4 py-2.5 font-medium text-slate-500 text-xs uppercase tracking-wide">Рекомендація</th>
             </tr>
           </thead>
@@ -56,6 +103,15 @@ export default function ReorderTable({ items }: { items: ReorderItem[] }) {
                       {item.sku}
                     </span>
                   </td>
+                  <td className="px-4 py-3">
+                    <span className="inline-flex items-center gap-1 text-xs text-slate-600">
+                      <svg className="h-3 w-3 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+                        <polyline points="9 22 9 12 15 12 15 22"/>
+                      </svg>
+                      {item.warehouseName || '—'}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-right">
                     <span className={`font-bold text-sm inline-flex items-center gap-1 ${isCritical ? 'text-red-600' : 'text-orange-500'}`}>
                       {isCritical && <XCircle className="h-3 w-3" />}
@@ -67,13 +123,24 @@ export default function ReorderTable({ items }: { items: ReorderItem[] }) {
                     <span className="text-blue-600 font-semibold">{item.eoq}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-500 max-w-xs">
-                    <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
-                      isCritical
-                        ? 'bg-red-50 text-red-700'
-                        : 'bg-orange-50 text-orange-700'
-                    }`}>
+                    <button
+                      onClick={() => navigate('/suppliers')}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium transition-all cursor-pointer"
+                      style={{
+                        background: isCritical ? 'rgba(220,38,38,0.1)' : 'rgba(234,88,12,0.1)',
+                        color: isCritical ? '#B91C1C' : '#C2410C',
+                        border: isCritical ? '1px solid rgba(220,38,38,0.3)' : '1px solid rgba(234,88,12,0.3)',
+                      }}
+                      onMouseEnter={e => {
+                        (e.currentTarget as HTMLElement).style.background = isCritical ? 'rgba(220,38,38,0.2)' : 'rgba(234,88,12,0.2)';
+                      }}
+                      onMouseLeave={e => {
+                        (e.currentTarget as HTMLElement).style.background = isCritical ? 'rgba(220,38,38,0.1)' : 'rgba(234,88,12,0.1)';
+                      }}
+                    >
+                      <ShoppingCart className="h-3 w-3" />
                       {isCritical ? 'КРИТИЧНО' : 'ЗАМОВИТИ'}
-                    </span>
+                    </button>
                     <span className="ml-2">{item.recommendation?.split('.')[0]}</span>
                   </td>
                 </tr>
@@ -85,4 +152,3 @@ export default function ReorderTable({ items }: { items: ReorderItem[] }) {
     </div>
   );
 }
-

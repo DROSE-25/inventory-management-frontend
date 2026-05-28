@@ -21,6 +21,7 @@ export interface ReorderItem {
   productId: number;
   productName: string;
   sku: string;
+  warehouseName: string;
   eoq: number;
   safetyStock: number;
   reorderPoint: number;

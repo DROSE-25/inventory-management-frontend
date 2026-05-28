@@ -4,28 +4,30 @@ import { useAuthStore } from '@/store/authStore';
 import {
   Package, LayoutDashboard, ShoppingCart, Truck,
   Warehouse, BarChart3, FileText, LogOut, Users,
-  ChevronRight, ChevronLeft, Menu,
+  ChevronRight, ChevronLeft, Menu, HelpCircle,
 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { to: '/dashboard',  icon: LayoutDashboard, label: 'Огляд',     adminOnly: false },
+  { to: '/dashboard',  icon: LayoutDashboard, label: 'Головна',     adminOnly: false },
   { to: '/products',   icon: Package,          label: 'Товари',        adminOnly: false },
   { to: '/sales',      icon: ShoppingCart,     label: 'Продажі',       adminOnly: false },
   { to: '/suppliers',  icon: Truck,            label: 'Постачальники', adminOnly: false },
   { to: '/warehouses', icon: Warehouse,        label: 'Склади',        adminOnly: false },
   { to: '/forecasts',  icon: BarChart3,        label: 'Прогнози',      adminOnly: false },
   { to: '/reports',    icon: FileText,         label: 'Звіти',         adminOnly: false },
+  { to: '/help',       icon: HelpCircle,       label: 'Інструкція',    adminOnly: false },
   { to: '/users',      icon: Users,            label: 'Користувачі',   adminOnly: true  },
 ];
 
 const PAGE_LABELS: Record<string, string> = {
-  '/dashboard':  'Огляд',
+  '/dashboard':  'Головна',
   '/products':   'Товари',
   '/sales':      'Продажі',
   '/suppliers':  'Постачальники',
   '/warehouses': 'Склади',
   '/forecasts':  'Прогнози',
   '/reports':    'Звіти',
+  '/help':       'Інструкція',
   '/users':      'Користувачі',
 };
 
@@ -53,6 +55,7 @@ const ROUTE_ACCENT: Record<string, string> = {
   '/warehouses': '#38BDF8',
   '/forecasts':  '#C084FC',
   '/reports':    '#38BDF8',
+  '/help':       '#B45309',
   '/users':      '#F87171',
 };
 
@@ -82,8 +85,10 @@ export default function DashboardLayout() {
           display: 'flex',
           flexDirection: 'column',
           transition: 'width 0.25s ease, min-width 0.25s ease',
-          position: 'relative',
-          overflow: 'hidden',
+          position: 'sticky',
+          top: 0,
+          height: '100vh',
+          overflow: 'visible',
           zIndex: 10,
         }}
       >
@@ -126,43 +131,8 @@ export default function DashboardLayout() {
           )}
         </div>
 
-        {/* Collapse toggle */}
-        <button
-          onClick={() => setCollapsed(c => !c)}
-          style={{
-            position: 'absolute',
-            top: '22px',
-            right: collapsed ? '50%' : '14px',
-            transform: collapsed ? 'translateX(50%)' : 'none',
-            width: '22px', height: '22px',
-            borderRadius: '50%',
-            background: '#1E293B',
-            border: '1px solid rgba(255,255,255,0.1)',
-            display: collapsed ? 'none' : 'flex',
-            alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: '#64748B',
-            transition: 'all 0.2s',
-          }}
-        >
-          <ChevronLeft size={12} />
-        </button>
-
         {/* Nav */}
         <nav style={{ flex: 1, padding: '12px 8px', overflowY: 'auto', overflowX: 'hidden' }}>
-          {/* Expand button when collapsed */}
-          {collapsed && (
-            <button
-              onClick={() => setCollapsed(false)}
-              style={{
-                width: '100%', display: 'flex', justifyContent: 'center',
-                padding: '8px 0', marginBottom: '8px',
-                background: 'transparent', border: 'none',
-                color: '#475569', cursor: 'pointer',
-              }}
-            >
-              <Menu size={18} />
-            </button>
-          )}
 
           {visibleItems.map(({ to, icon: Icon, label }) => {
             const isActive = location.pathname === to;
@@ -320,35 +290,20 @@ export default function DashboardLayout() {
           gap: '12px',
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* Collapse toggle in header when sidebar is open */}
-            {!collapsed && (
-              <button
-                onClick={() => setCollapsed(true)}
-                style={{
-                  width: '28px', height: '28px', borderRadius: '8px',
-                  background: 'transparent', border: '1px solid #E2E8F0',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', color: '#94A3B8', marginRight: '4px',
-                }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F8FAFC'; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-              >
-                <Menu size={14} />
-              </button>
-            )}
-            {collapsed && (
-              <button
-                onClick={() => setCollapsed(false)}
-                style={{
-                  width: '28px', height: '28px', borderRadius: '8px',
-                  background: 'transparent', border: '1px solid #E2E8F0',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer', color: '#94A3B8', marginRight: '4px',
-                }}
-              >
-                <Menu size={14} />
-              </button>
-            )}
+            <button
+              onClick={() => setCollapsed(c => !c)}
+              style={{
+                width: '28px', height: '28px', borderRadius: '8px',
+                background: 'transparent', border: '1px solid #E2E8F0',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: '#94A3B8', marginRight: '4px',
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F8FAFC'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+            >
+              <Menu size={14} />
+            </button>
+            
 
             {/* Page title */}
             <div style={{

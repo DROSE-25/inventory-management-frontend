@@ -50,7 +50,7 @@ export default function ReportsPage() {
     downloadCsv(reorderData.map(item => ({
       'ID товару': item.productId, 'Назва': item.productName, 'SKU': item.sku,
       'Залишок': item.currentStock, 'ROP': item.reorderPoint,
-      'EOQ': item.eoq, 'Safety Stock': item.safetyStock, 'Рекомендація': item.recommendation,
+      'EOQ': item.eoq, 'Страховий запас': item.safetyStock, 'Рекомендація': item.recommendation,
     })), 'reorder_alerts.csv');
     toast.success('CSV завантажено');
   };

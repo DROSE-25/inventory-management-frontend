@@ -51,8 +51,10 @@ export default function ProductsPage() {
   const [saving, setSaving]       = useState(false);
   const [formError, setFormError] = useState('');
 
-  const [deleteId, setDeleteId] = useState<number | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [deleteId, setDeleteId]       = useState<number | null>(null);
+  const [deleting, setDeleting]       = useState(false);
+  const [filterCategory, setFilterCategory] = useState('');
+  const [filterSupplier, setFilterSupplier] = useState('');
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -72,6 +74,14 @@ export default function ProductsPage() {
     getAllSuppliers().then(setSuppliers).catch(() => {});
     getCategories().then(setCategories).catch(() => {});
   }, []);
+
+  const filteredProducts = products.filter(prod => {
+    const catName = (prod as any).categoryName ?? (prod as any).category?.name ?? '';
+    const supName = (prod as any).supplierName ?? (prod as any).supplier?.name ?? '';
+    if (filterCategory && catName !== filterCategory) return false;
+    if (filterSupplier && supName !== filterSupplier) return false;
+    return true;
+  });
 
   const openCreate = () => {
     setEditItem(null); setForm(emptyForm); setFormError(''); setFormOpen(true);
@@ -148,15 +158,43 @@ export default function ProductsPage() {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-        <Input
-          placeholder="Пошук за назвою або SKU..."
-          className="pl-9"
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(0); }}
-        />
+      {/* Search + filters */}
+      <div className="flex flex-wrap gap-3 items-center">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input
+            placeholder="Пошук за назвою або SKU..."
+            className="pl-9 w-64"
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(0); }}
+          />
+        </div>
+        <Select value={filterCategory || "__all__"} onValueChange={v => setFilterCategory(v === "__all__" ? "" : v)}>
+          <SelectTrigger className="w-44 h-9">
+            <SelectValue placeholder="Всі категорії" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">Всі категорії</SelectItem>
+            {categories.map(c => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        <Select value={filterSupplier || "__all__"} onValueChange={v => setFilterSupplier(v === "__all__" ? "" : v)}>
+          <SelectTrigger className="w-44 h-9">
+            <SelectValue placeholder="Всі постачальники" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">Всі постачальники</SelectItem>
+            {suppliers.map(s => <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        {(filterCategory || filterSupplier) && (
+          <button
+            onClick={() => { setFilterCategory(''); setFilterSupplier(''); }}
+            className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+          >
+            Скинути фільтри ✕
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -167,6 +205,7 @@ export default function ProductsPage() {
               <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Назва</th>
               <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">SKU</th>
               <th className="text-right px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Ціна</th>
+              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Од.</th>
               <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Категорія</th>
               <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Постачальник</th>
               <th className="text-center px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Статус</th>
@@ -177,14 +216,14 @@ export default function ProductsPage() {
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} className="border-b">
-                  {Array.from({ length: isAdmin ? 7 : 6 }).map((_, j) => (
+                  {Array.from({ length: isAdmin ? 8 : 7 }).map((_, j) => (
                     <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
                   ))}
                 </tr>
               ))
-            ) : products.length === 0 ? (
+            ) : filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={isAdmin ? 7 : 6}>
+                <td colSpan={isAdmin ? 8 : 7}>
                   <EmptyState
                     title="Товарів не знайдено"
                     description="Додайте перший товар до каталогу"
@@ -193,7 +232,7 @@ export default function ProductsPage() {
                   />
                 </td>
               </tr>
-            ) : products.map((prod, i) => (
+            ) : filteredProducts.map((prod, i) => (
               <tr key={prod.id}
                 className="border-b transition-colors hover:bg-blue-50/30"
                 style={{ background: i % 2 !== 0 ? 'rgba(248,250,252,0.6)' : undefined }}>
@@ -208,6 +247,11 @@ export default function ProductsPage() {
                 <td className="px-4 py-3 text-right">
                   <span className="font-semibold text-slate-700">{prod.unitPrice?.toFixed(2)}</span>
                   <span className="text-slate-400 text-xs ml-1">грн</span>
+                </td>
+                <td className="px-4 py-3">
+                  <span className="inline-block text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-medium">
+                    {prod.unitOfMeasure || 'шт'}
+                  </span>
                 </td>
                 <td className="px-4 py-3">
                   <span className="inline-flex items-center gap-1 text-slate-500 text-xs">
@@ -327,7 +371,12 @@ export default function ProductsPage() {
             </div>
 
             <div>
-              <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">Вартість замовлення (грн)</Label>
+              <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">
+                Вартість замовлення (грн)
+                <span className="ml-1 text-slate-300 normal-case font-normal tracking-normal" style={{ fontSize: '10px' }}>
+                  — скільки коштує оформити одне замовлення постачальнику (доставка, оформлення)
+                </span>
+              </Label>
               <Input type="number" min={0} step={0.01} value={form.orderingCost}
                 onChange={e => setForm(f => ({ ...f, orderingCost: parseFloat(e.target.value) || 0 }))} />
             </div>

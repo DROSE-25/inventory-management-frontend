@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const [abcItems, setAbcItems]         = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
   const [lastUpdated, setLastUpdated]   = useState<Date | null>(null);
+  const [selectedAbcClass, setSelectedAbcClass] = useState<string | null>(null);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -34,6 +35,14 @@ export default function DashboardPage() {
   const totalRevenue    = abcItems.reduce((sum, i) => sum + Number(i.revenue ?? 0), 0);
   const forecastedSales = totalRevenue / 12;
 
+  // Фільтруємо критичні залишки по вибраному ABC-класу
+  const filteredReorderItems = selectedAbcClass
+    ? reorderItems.filter(item => {
+        const abcItem = abcItems.find(a => a.productId === item.productId);
+        return abcItem?.abcClass === selectedAbcClass;
+      })
+    : reorderItems;
+
   const timeStr = lastUpdated
     ? lastUpdated.toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
     : null;
@@ -53,7 +62,7 @@ export default function DashboardPage() {
               <span className="text-xs font-medium" style={{ color: '#94A3B8' }}>Система активна</span>
             </div>
             <h1 className="text-3xl font-bold text-white tracking-tight mb-1">
-              Огляд
+              Головна
             </h1>
             <p style={{ color: '#64748B', fontSize: '14px' }}>
               Огляд ключових показників системи управління запасами
@@ -113,10 +122,14 @@ export default function DashboardPage() {
       {!loading && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
-            <AbcPieChart items={abcItems} />
+            <AbcPieChart
+              items={abcItems}
+              selectedClass={selectedAbcClass}
+              onClassSelect={setSelectedAbcClass}
+            />
           </div>
           <div className="lg:col-span-2">
-            <ReorderTable items={reorderItems} />
+            <ReorderTable items={filteredReorderItems} />
           </div>
         </div>
       )}
@@ -135,4 +148,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
 

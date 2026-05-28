@@ -178,16 +178,20 @@ export default function SuppliersPage() {
               {/* Contact info */}
               <div className="space-y-1.5 mb-4">
                 {s.email ? (
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <Mail className="h-3 w-3 text-slate-400" />
-                    <span>{s.email}</span>
-                  </div>
+                  <a href={`mailto:${s.email}`}
+                    className="flex items-center gap-2 text-xs text-slate-500 hover:text-purple-600 transition-colors group"
+                    title="Написати листа">
+                    <Mail className="h-3 w-3 text-slate-400 group-hover:text-purple-500" />
+                    <span className="group-hover:underline">{s.email}</span>
+                  </a>
                 ) : null}
                 {s.phone ? (
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
-                    <Phone className="h-3 w-3 text-slate-400" />
-                    <span>{s.phone}</span>
-                  </div>
+                  <a href={`tel:${s.phone}`}
+                    className="flex items-center gap-2 text-xs text-slate-500 hover:text-purple-600 transition-colors group"
+                    title="Зателефонувати">
+                    <Phone className="h-3 w-3 text-slate-400 group-hover:text-purple-500" />
+                    <span className="group-hover:underline">{s.phone}</span>
+                  </a>
                 ) : null}
                 <div className="flex items-center gap-2 text-xs text-slate-500">
                   <Clock className="h-3 w-3 text-slate-400" />

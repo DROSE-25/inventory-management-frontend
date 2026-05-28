@@ -76,8 +76,8 @@ export default function LoginPage() {
             <Package2 size={22} color="white" />
           </div>
           <div>
-            <div style={{ color: 'white', fontWeight: '700', fontSize: '16px', lineHeight: 1 }}>Inventory</div>
-            <div style={{ color: '#64748B', fontSize: '12px', marginTop: '2px' }}>Management System</div>
+            <div style={{ color: 'white', fontWeight: '700', fontSize: '16px', lineHeight: 1 }}>Склад і запаси</div>
+            <div style={{ color: '#64748B', fontSize: '12px', marginTop: '2px' }}></div>
           </div>
         </div>
 
@@ -121,7 +121,7 @@ export default function LoginPage() {
           <div style={{ marginTop: '40px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {[
               { icon: BarChart3, label: 'Прогнозування попиту', desc: '6 методів прогнозування з автовибором' },
-              { icon: ShieldCheck, label: 'Рольовий доступ', desc: 'Admin, Manager, Analyst' },
+              { icon: ShieldCheck, label: 'Рольовий доступ', desc: 'Адмін, Менеджер, Аналітик' },
               { icon: Boxes, label: 'ABC/XYZ аналіз', desc: 'Класифікація товарів за оборотом' },
             ].map(({ icon: Icon, label, desc }) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>

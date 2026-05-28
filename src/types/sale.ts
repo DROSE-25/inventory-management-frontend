@@ -3,12 +3,14 @@ export interface Sale {
   saleDate: string;
   quantity: number;
   unitPrice: number;
+  unitOfMeasure?: string;
   createdAt: string;
   createdBy: string;
   product: {
     id: number;
     name: string;
     sku: string;
+    unitOfMeasure?: string;
   };
   warehouse: {
     id: number;

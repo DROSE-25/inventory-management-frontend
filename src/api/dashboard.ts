@@ -3,7 +3,10 @@ import type { ReorderItem, SalePoint } from '@/types/dashboard';
 
 export const getReorderAlerts = async (): Promise<ReorderItem[]> => {
   const res = await apiClient.get('/optimization/reorder-alerts');
-  return res.data;
+  return (res.data as any[]).map(item => ({
+    ...item,
+    warehouseName: item.warehouseName ?? item.warehouse_name ?? item.warehouseId ?? '—',
+  }));
 };
 
 export const getAbcXyz = async (): Promise<any[]> => {
