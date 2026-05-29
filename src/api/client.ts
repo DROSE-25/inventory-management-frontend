@@ -1,12 +1,12 @@
 import axios from 'axios';
- 
+
 export const apiClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
 });
- 
+
 // Request interceptor — додаємо JWT в кожен запит
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
@@ -15,7 +15,7 @@ apiClient.interceptors.request.use((config) => {
   }
   return config;
 });
- 
+
 // Response interceptor — обробляємо 401
 apiClient.interceptors.response.use(
   (response) => response,
@@ -23,7 +23,6 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('accessToken');
       localStorage.removeItem('user');
-      // Якщо ми не на логіні — редіректимо
       if (window.location.pathname !== '/login') {
         window.location.href = '/login';
       }

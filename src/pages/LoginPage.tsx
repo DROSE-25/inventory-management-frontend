@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '@/api/auth';
 import { useAuthStore } from '@/store/authStore';
 import { Input } from '@/components/ui/input';
@@ -266,6 +266,13 @@ export default function LoginPage() {
               Пароль: <span style={{ color: '#E0E4FD' }}>admin123</span>
             </p>
           </div>
+
+          <p style={{ textAlign: 'center', marginTop: '20px', color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>
+            Немає акаунту?{' '}
+            <Link to="/register" style={{ color: '#8E9EF7', textDecoration: 'none', fontWeight: 600 }}>
+              Зареєструватись
+            </Link>
+          </p>
         </div>
       </div>
 
