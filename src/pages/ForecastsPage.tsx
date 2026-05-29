@@ -8,10 +8,10 @@ import type { CompareResponse, ProductOption } from '@/types/forecast';
 const accuracy = (mape: number) => Math.max(0, Math.round(100 - mape));
 
 function AccuracyBar({ value }: { value: number }) {
-  const color = value >= 75 ? '#16A34A' : value >= 55 ? '#CA8A04' : '#DC2626';
+  const color = value >= 75 ? '#0891B2' : value >= 55 ? '#F59E0B' : '#DC2626';
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-      <div style={{ flex: 1, height: 8, background: '#E2E8F0', borderRadius: 4, overflow: 'hidden' }}>
+      <div style={{ flex: 1, height: 8, background: '#E8E9EC', borderRadius: 4, overflow: 'hidden' }}>
         <div style={{ width: `${value}%`, height: '100%', background: color, borderRadius: 4, transition: 'width 0.6s ease' }} />
       </div>
       <span style={{ fontSize: 14, fontWeight: 700, color, minWidth: 36 }}>{value}%</span>
@@ -19,10 +19,11 @@ function AccuracyBar({ value }: { value: number }) {
   );
 }
 
-function TrendIcon({ slope }: { slope: number }) {
-  if (slope > 0.05) return <TrendingUp className="h-5 w-5" style={{ color: '#16A34A' }} />;
-  if (slope < -0.05) return <TrendingDown className="h-5 w-5" style={{ color: '#DC2626' }} />;
-  return <Minus className="h-5 w-5" style={{ color: '#64748B' }} />;
+function TrendIcon({ slope, bright }: { slope: number; bright?: boolean }) {
+  const c = bright ? 'white' : undefined;
+  if (slope > 0.05) return <TrendingUp className="h-5 w-5" style={{ color: c || '#F59E0B' }} />;
+  if (slope < -0.05) return <TrendingDown className="h-5 w-5" style={{ color: c || '#DC2626' }} />;
+  return <Minus className="h-5 w-5" style={{ color: c || '#64748B' }} />;
 }
 
 function ForecastChart({ forecast }: { forecast: { date: string; value: number }[] }) {
@@ -48,20 +49,20 @@ function ForecastChart({ forecast }: { forecast: { date: string; value: number }
         const v = minV + (maxV - minV) * t;
         return (
           <g key={i}>
-            <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="#F1F5F9" strokeWidth="1" />
+            <line x1={PAD.left} y1={y} x2={W - PAD.right} y2={y} stroke="#F2F4F8" strokeWidth="1" />
             <text x={PAD.left - 6} y={y + 4} textAnchor="end" fontSize="10" fill="#94A3B8">{Math.round(v)}</text>
           </g>
         );
       })}
-      <polygon points={`${upper} ${lower}`} fill="#3B82F6" fillOpacity="0.08" />
-      <polyline points={pts} fill="none" stroke="#3B82F6" strokeWidth="2.5" strokeLinejoin="round" />
-      {forecast.map((p, i) => <circle key={i} cx={xS(i)} cy={yS(p.value)} r="3" fill="#3B82F6" />)}
+      <polygon points={`${upper} ${lower}`} fill="#6B7FD4" fillOpacity="0.08" />
+      <polyline points={pts} fill="none" stroke="#6B7FD4" strokeWidth="2.5" strokeLinejoin="round" />
+      {forecast.map((p, i) => <circle key={i} cx={xS(i)} cy={yS(p.value)} r="3" fill="#6B7FD4" />)}
       {ticks.map((p, i) => {
         const idx = forecast.indexOf(p);
         return <text key={i} x={xS(idx)} y={H - 8} textAnchor="middle" fontSize="10" fill="#94A3B8">{p.date.slice(5)}</text>;
       })}
-      <line x1={PAD.left} y1={PAD.top} x2={PAD.left} y2={PAD.top + iH} stroke="#E2E8F0" />
-      <line x1={PAD.left} y1={PAD.top + iH} x2={W - PAD.right} y2={PAD.top + iH} stroke="#E2E8F0" />
+      <line x1={PAD.left} y1={PAD.top} x2={PAD.left} y2={PAD.top + iH} stroke="#E8E9EC" />
+      <line x1={PAD.left} y1={PAD.top + iH} x2={W - PAD.right} y2={PAD.top + iH} stroke="#E8E9EC" />
     </svg>
   );
 }
@@ -83,12 +84,29 @@ export default function ForecastsPage() {
   const [stockQty, setStockQty]     = useState<number | null>(null);
   const [prevMonthSales, setPrevMonthSales] = useState<number | null>(null);
   const reportRef = useRef<HTMLDivElement>(null);
+  const [exportLoading, setExportLoading] = useState<'excel'|null>(null);
   const [saved, setSaved] = useState(false);
-  const [exportLoading, setExportLoading] = useState<'excel'|'pdf'|null>(null);
 
   useEffect(() => {
     getProducts().then(setProducts).catch(console.error);
   }, []);
+
+  const handleExportExcel = async () => {
+    if (!selected) return;
+    setExportLoading('excel');
+    try {
+      const res = await apiClient.get(
+        `/forecast-export/excel/forecast/${selected}?horizon=${horizon}`,
+        { responseType: 'blob' }
+      );
+      const url = URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `forecast_${result?.productName ?? 'product'}_${new Date().toISOString().split('T')[0]}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch { } finally { setExportLoading(null); }
+  };
 
   const runForecast = async (id: number, h: number) => {
     setResult(null); setError(null);
@@ -168,31 +186,6 @@ export default function ForecastsPage() {
   const sorted = result ? [...result.results].sort((a, b) => a.mape - b.mape) : [];
 
   // Save report as text file
-  const handleExportExcel = async () => {
-    setExportLoading('excel');
-    try {
-      const res = await apiClient.get('/forecast-export/excel/reorder', { responseType: 'blob' });
-      const url = URL.createObjectURL(new Blob([res.data]));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `reorder_alerts_${new Date().toISOString().split('T')[0]}.xlsx`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch { } finally { setExportLoading(null); }
-  };
-
-  const handleExportPdf = async () => {
-    setExportLoading('pdf');
-    try {
-      const res = await apiClient.get('/forecast-export/pdf/reorder', { responseType: 'blob' });
-      const url = URL.createObjectURL(new Blob([res.data], { type: 'application/pdf' }));
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `reorder_alerts_${new Date().toISOString().split('T')[0]}.pdf`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch { } finally { setExportLoading(null); }
-  };
 
   const handleSaveReport = () => {
     if (!result || !insights) return;
@@ -239,18 +232,18 @@ export default function ForecastsPage() {
     <div className="space-y-5" ref={reportRef}>
 
       {/* Header */}
-      <div className="rounded-xl overflow-hidden" style={{
-        background: 'linear-gradient(135deg, #1A0E2E 0%, #1E293B 60%, #0F1628 100%)',
+      <div className="rounded-lg overflow-hidden" style={{
+        background: 'linear-gradient(135deg, #2A3050 0%, #3D4F7C 100%)',
         padding: '24px 28px',
       }}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-            style={{ background: 'linear-gradient(135deg, #7C3AED, #C084FC)' }}>
+            style={{ background: 'rgba(255,255,255,0.25)' }}>
             <TrendingUp className="h-5 w-5 text-white" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">Прогноз продажів</h1>
-            <p className="text-sm" style={{ color: '#64748B' }}>
+            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
               Оберіть товар — система автоматично визначить найточніший прогноз
             </p>
           </div>
@@ -258,7 +251,7 @@ export default function ForecastsPage() {
       </div>
 
       {/* Controls */}
-      <div className="rounded-xl border bg-white p-5 shadow-sm">
+      <div className="rounded-lg border bg-white p-5 shadow-sm">
         <div className="flex flex-wrap gap-4 items-end">
           <div className="flex-1 min-w-48">
             <p className="text-sm font-semibold text-slate-700 mb-2 flex items-center gap-2">
@@ -292,7 +285,7 @@ export default function ForecastsPage() {
                   onClick={() => handleHorizon(h.value)}
                   className="px-4 py-2.5 text-sm font-medium transition-colors"
                   style={{
-                    background: horizon === h.value ? '#7C3AED' : 'white',
+                    background: horizon === h.value ? '#6B7FD4' : 'white',
                     color: horizon === h.value ? 'white' : '#64748B',
                     border: 'none',
                     cursor: 'pointer',
@@ -307,14 +300,14 @@ export default function ForecastsPage() {
       </div>
 
       {loading && (
-        <div className="rounded-xl border bg-white p-12 flex flex-col items-center gap-3">
-          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+        <div className="rounded-lg border bg-white p-12 flex flex-col items-center gap-3">
+          <Loader2 className="h-8 w-8 animate-spin text-orange-400" />
           <p className="text-slate-500 text-sm">Розраховую прогноз на {horizon} днів...</p>
         </div>
       )}
 
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 p-5 flex items-start gap-3">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-5 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-red-500 mt-0.5 shrink-0" />
           <p className="text-sm text-red-700">{error}</p>
         </div>
@@ -325,26 +318,30 @@ export default function ForecastsPage() {
           {/* Insights cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <Target className="h-4 w-4 text-slate-400" />
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Точність прогнозу</span>
+            <div className="rounded-lg bg-white p-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-medium text-slate-500">Точність прогнозу</span>
+                <div style={{ width: 40, height: 40, borderRadius: 6, background: 'linear-gradient(135deg, #0891B2, #38BDF8)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Target className="h-5 w-5 text-white" />
+                </div>
               </div>
               <AccuracyBar value={insights.acc} />
-              <p className="text-xs text-slate-400 mt-2">{insights.accText}</p>
+              <p className="text-xs mt-2 font-semibold" style={{ color: insights.acc >= 75 ? "#0891B2" : insights.acc >= 55 ? "#F59E0B" : "#DC2626" }}>{insights.accText}</p>
             </div>
 
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <TrendIcon slope={insights.slope} />
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Тренд</span>
+            <div className="rounded-lg bg-white p-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-medium text-slate-500">Тренд</span>
+                <div style={{ width: 40, height: 40, borderRadius: 6, background: 'linear-gradient(135deg, #F59E0B, #FBBF24)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <TrendIcon slope={insights.slope} bright />
+                </div>
               </div>
               <p className="text-base font-semibold text-slate-800">{insights.trendText}</p>
               {insights.vsLastMonth !== null && (
                 <div className="mt-2 flex items-center gap-1.5">
                   <span className="text-xs text-slate-400">Порівняно з минулим місяцем:</span>
                   <span className="text-xs font-bold" style={{
-                    color: insights.vsLastMonth > 5 ? '#16A34A' : insights.vsLastMonth < -5 ? '#DC2626' : '#64748B'
+                    color: insights.vsLastMonth > 5 ? '#0891B2' : insights.vsLastMonth < -5 ? '#DC2626' : '#64748B'
                   }}>
                     {insights.vsLastMonth > 0 ? '+' : ''}{insights.vsLastMonth}%
                   </span>
@@ -357,10 +354,12 @@ export default function ForecastsPage() {
               )}
             </div>
 
-            <div className="rounded-xl border bg-white p-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-3">
-                <Calendar className="h-4 w-4 text-slate-400" />
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Потреба</span>
+            <div className="rounded-lg bg-white p-5" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-medium text-slate-500">Потреба</span>
+                <div style={{ width: 40, height: 40, borderRadius: 6, background: 'linear-gradient(135deg, #8B5CF6, #C4B5FD)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Calendar className="h-5 w-5 text-white" />
+                </div>
               </div>
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
@@ -371,15 +370,15 @@ export default function ForecastsPage() {
                   <span className="text-sm text-slate-600">Наступний тиждень</span>
                   <span className="font-bold text-slate-800">{Math.round(insights.week2)} шт</span>
                 </div>
-                <div className="flex justify-between items-center pt-1.5" style={{ borderTop: '1px solid #F1F5F9' }}>
+                <div className="flex justify-between items-center pt-1.5" style={{ borderTop: '1px solid #F2F4F8' }}>
                   <span className="text-sm font-semibold text-slate-700">На {horizon} днів</span>
-                  <span className="font-bold text-lg text-purple-700">{Math.round(insights.totalPeriod)} шт</span>
+                  <span className="font-bold text-lg" style={{ color: '#6B7FD4' }}>{Math.round(insights.totalPeriod)} шт</span>
                 </div>
                 {insights.daysLeft !== null && (
-                  <div className="flex justify-between items-center pt-1.5" style={{ borderTop: '1px solid #F1F5F9' }}>
+                  <div className="flex justify-between items-center pt-1.5" style={{ borderTop: '1px solid #F2F4F8' }}>
                     <span className="text-sm text-slate-600">⚠️ Залишок закінчиться</span>
                     <span className="font-bold text-sm" style={{
-                      color: insights.daysLeft <= 7 ? '#DC2626' : insights.daysLeft <= 14 ? '#CA8A04' : '#16A34A'
+                      color: insights.daysLeft <= 7 ? '#DC2626' : insights.daysLeft <= 14 ? '#F59E0B' : '#0891B2'
                     }}>
                       через {insights.daysLeft} дн.
                     </span>
@@ -390,13 +389,7 @@ export default function ForecastsPage() {
           </div>
 
           {/* Recommendation */}
-          <div className="rounded-xl p-5" style={{
-            background: insights.acc >= 75
-              ? 'linear-gradient(135deg, #14532D, #15803D)'
-              : insights.acc >= 55
-                ? 'linear-gradient(135deg, #713F12, #A16207)'
-                : 'linear-gradient(135deg, #7F1D1D, #B91C1C)',
-          }}>
+          <div className="rounded-lg p-5" style={{ background: '#1A1A2E', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center shrink-0">
@@ -414,35 +407,17 @@ export default function ForecastsPage() {
                   </p>
                 </div>
               </div>
-              {/* Save report button */}
-              <div className="flex items-center gap-2 shrink-0">
-                <button onClick={handleExportExcel} disabled={exportLoading !== null}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={{ background: 'rgba(21,128,61,0.2)', color: 'white', border: '1px solid rgba(74,222,128,0.3)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                  {exportLoading === 'excel' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileSpreadsheet className="h-3.5 w-3.5" />}
-                  Excel
-                </button>
-                <button onClick={handleExportPdf} disabled={exportLoading !== null}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={{ background: 'rgba(220,38,38,0.2)', color: 'white', border: '1px solid rgba(248,113,113,0.3)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                  {exportLoading === 'pdf' ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileText className="h-3.5 w-3.5" />}
-                  PDF
-                </button>
-                <button onClick={handleSaveReport}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
-                  style={{
-                    background: saved ? 'rgba(74,222,128,0.25)' : 'rgba(255,255,255,0.15)',
-                    color: 'white', border: saved ? '1px solid rgba(74,222,128,0.5)' : '1px solid rgba(255,255,255,0.25)',
-                    cursor: 'pointer', whiteSpace: 'nowrap', transition: 'all 0.3s',
-                  }}>
-                  {saved ? <><span>✓</span> Збережено!</> : <><Download className="h-3.5 w-3.5" /> TXT</>}
-                </button>
-              </div>
+              <button onClick={handleExportExcel} disabled={exportLoading !== null}
+                className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold shrink-0"
+                style={{ background: 'white', color: '#15803D', border: '2px solid white', cursor: 'pointer', whiteSpace: 'nowrap', fontWeight: 700 }}>
+                <FileSpreadsheet className="h-4 w-4" />
+                {exportLoading === 'excel' ? 'Завантаження...' : 'Excel'}
+              </button>
             </div>
           </div>
 
           {/* Chart */}
-          <div className="rounded-xl border bg-white p-5 shadow-sm">
+          <div className="rounded-lg border bg-white p-5 shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <div>
                 <p className="font-semibold text-slate-800">Очікувані продажі — наступні {horizon} днів</p>
@@ -450,11 +425,11 @@ export default function ForecastsPage() {
               </div>
               <div className="flex items-center gap-3 text-xs text-slate-500">
                 <div className="flex items-center gap-1.5">
-                  <div style={{ width: 24, height: 3, background: '#3B82F6', borderRadius: 2 }} />
+                  <div style={{ width: 24, height: 3, background: '#6B7FD4', borderRadius: 2 }} />
                   Прогноз
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div style={{ width: 16, height: 10, background: 'rgba(59,130,246,0.15)', borderRadius: 2 }} />
+                  <div style={{ width: 16, height: 10, background: 'rgba(91,108,240,0.15)', borderRadius: 2 }} />
                   Діапазон
                 </div>
               </div>
@@ -463,7 +438,7 @@ export default function ForecastsPage() {
           </div>
 
           {/* Technical details */}
-          <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+          <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
             <button
               onClick={() => setShowTech(v => !v)}
               className="w-full flex items-center justify-between p-5 text-left hover:bg-slate-50 transition-colors"
@@ -478,7 +453,7 @@ export default function ForecastsPage() {
               <div className="border-t">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr style={{ background: '#F8FAFC' }}>
+                    <tr style={{ background: '#F5F6F8' }}>
                       <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">#</th>
                       <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Метод</th>
                       <th className="text-left px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">Точність</th>
@@ -489,14 +464,14 @@ export default function ForecastsPage() {
                     {sorted.map((r, idx) => {
                       const isBest = r.method === result.best.method;
                       const acc = accuracy(r.mape);
-                      const color = acc >= 75 ? '#16A34A' : acc >= 55 ? '#CA8A04' : '#DC2626';
+                      const color = acc >= 75 ? '#10B981' : acc >= 55 ? '#CA8A04' : '#DC2626';
                       return (
                         <tr key={r.method} className="border-t hover:bg-slate-50"
                           style={{ background: isBest ? 'rgba(22,163,74,0.05)' : undefined }}>
                           <td className="px-5 py-3 text-slate-400 text-xs">{idx + 1}</td>
                           <td className="px-5 py-3">
-                            <span className={`font-medium ${isBest ? 'text-green-700' : 'text-slate-700'}`}>{r.method}</span>
-                            {isBest && <span className="ml-2 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-semibold">Обрано</span>}
+                            <span className={`font-medium ${isBest ? 'text-emerald-600' : 'text-slate-700'}`}>{r.method}</span>
+                            {isBest && <span className="ml-2 text-xs bg-green-100 text-emerald-600 px-2 py-0.5 rounded font-semibold">Обрано</span>}
                           </td>
                           <td className="px-5 py-3" style={{ width: 180 }}><AccuracyBar value={acc} /></td>
                           <td className="px-5 py-3 text-right font-mono text-xs" style={{ color }}>{r.mape.toFixed(1)}%</td>
@@ -515,10 +490,10 @@ export default function ForecastsPage() {
       )}
 
       {!result && !loading && !error && (
-        <div className="rounded-xl border bg-white p-14 text-center">
-          <div className="w-16 h-16 rounded-2xl mx-auto mb-5 flex items-center justify-center"
+        <div className="rounded-lg border bg-white p-14 text-center">
+          <div className="w-16 h-16 rounded-lg mx-auto mb-5 flex items-center justify-center"
             style={{ background: 'rgba(124,58,237,0.08)' }}>
-            <TrendingUp className="h-8 w-8 text-purple-400" />
+            <TrendingUp className="h-8 w-8 text-orange-400" />
           </div>
           <p className="text-slate-700 font-semibold mb-2 text-base">Оберіть товар вище</p>
           <p className="text-slate-400 text-sm max-w-xs mx-auto">

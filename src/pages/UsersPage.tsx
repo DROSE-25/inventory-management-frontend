@@ -21,8 +21,8 @@ const emptyForm: UserForm = { username: '', email: '', password: '', role: 'MANA
 
 const ROLE_CONFIG: Record<string, { label: string; color: string; bg: string; icon: any }> = {
   ADMIN:    { label: 'Адмін',    color: '#DC2626', bg: 'rgba(220,38,38,0.1)',   icon: Shield },
-  MANAGER:  { label: 'Менеджер', color: '#1D4ED8', bg: 'rgba(29,78,216,0.1)',   icon: ShieldCheck },
-  ANALYST:  { label: 'Аналітик', color: '#15803D', bg: 'rgba(21,128,61,0.1)',   icon: Eye },
+  MANAGER:  { label: 'Менеджер', color: '#5A68C0', bg: 'rgba(74,90,212,0.1)',   icon: ShieldCheck },
+  ANALYST:  { label: 'Аналітик', color: '#059669', bg: 'rgba(21,128,61,0.1)',   icon: Eye },
 };
 
 function getRoleConfig(role: string) {
@@ -85,24 +85,23 @@ export default function UsersPage() {
 
       {/* Header */}
       <div className="rounded-lg overflow-hidden" style={{
-        background: 'linear-gradient(135deg, #1A0A0A 0%, #1E293B 60%, #1A0F0F 100%)',
+        background: 'linear-gradient(135deg, #2A3050 0%, #3D4F7C 100%)',
         padding: '24px 28px',
       }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #DC2626, #F87171)' }}>
+              style={{ background: 'rgba(255,255,255,0.25)' }}>
               <Users className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Користувачі</h1>
-              <p className="text-sm" style={{ color: '#64748B' }}>Управління обліковими записами</p>
+              <p className="text-2xl font-semibold text-white">Управління обліковими записами</p>
             </div>
           </div>
           <button
             onClick={() => { setForm(emptyForm); setFormError(''); setFormOpen(true); }}
             className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold"
-            style={{ background: 'linear-gradient(135deg, #DC2626, #F87171)', color: 'white', border: 'none', cursor: 'pointer' }}
+            style={{ background: 'white', color: '#5B6CF0', border: 'none', cursor: 'pointer', fontWeight: '700' }}
           >
             <Plus className="h-4 w-4" />
             Новий користувач
@@ -110,21 +109,21 @@ export default function UsersPage() {
         </div>
 
         {!loading && (
-          <div className="flex gap-6 mt-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex gap-6 mt-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.25)' }}>
             <div>
-              <div className="text-xs mb-1" style={{ color: '#475569' }}>Всього</div>
+              <div className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Всього</div>
               <div className="text-xl font-bold text-white">{users.length}</div>
             </div>
             <div>
-              <div className="text-xs mb-1" style={{ color: '#475569' }}>Активних</div>
+              <div className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Активних</div>
               <div className="text-xl font-bold" style={{ color: '#F87171' }}>{activeCount}</div>
             </div>
             <div>
-              <div className="text-xs mb-1" style={{ color: '#475569' }}>Адміністраторів</div>
+              <div className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Адміністраторів</div>
               <div className="text-xl font-bold text-white">{adminCount}</div>
             </div>
             <div>
-              <div className="text-xs mb-1" style={{ color: '#475569' }}>Менеджерів</div>
+              <div className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Менеджерів</div>
               <div className="text-xl font-bold text-white">{managerCount}</div>
             </div>
           </div>
@@ -135,7 +134,7 @@ export default function UsersPage() {
       <div className="rounded-md border bg-white overflow-hidden shadow-sm">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b" style={{ background: '#F8FAFC' }}>
+            <tr className="border-b" style={{ background: '#F5F6F8' }}>
               {['Користувач', 'Email', 'Роль', 'Статус', 'Дата створення', 'Дії'].map((h, i) => (
                 <th key={h} className={`px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400 ${i === 5 ? 'text-center' : 'text-left'}`}>
                   {h}
@@ -175,7 +174,7 @@ export default function UsersPage() {
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
-                        style={{ background: u.isActive ? 'linear-gradient(135deg, #DC2626, #F87171)' : '#CBD5E1' }}>
+                        style={{ background: u.isActive ? 'linear-gradient(135deg, #DC2626, #F87171)' : '#DDE0E5' }}>
                         {getAvatar(u.username)}
                       </div>
                       <span className="font-semibold text-slate-800">{u.username}</span>
@@ -223,7 +222,7 @@ export default function UsersPage() {
                         style={{
                           background: u.isActive ? 'rgba(220,38,38,0.06)' : 'rgba(21,128,61,0.06)',
                           border: u.isActive ? '1px solid rgba(220,38,38,0.2)' : '1px solid rgba(21,128,61,0.2)',
-                          color: u.isActive ? '#DC2626' : '#15803D',
+                          color: u.isActive ? '#DC2626' : '#059669',
                           cursor: 'pointer',
                         }}
                       >
@@ -286,7 +285,7 @@ export default function UsersPage() {
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setFormOpen(false)} disabled={saving}>Скасувати</Button>
             <Button onClick={handleSave} disabled={saving}
-              style={{ background: 'linear-gradient(135deg, #DC2626, #F87171)', border: 'none' }}>
+              style={{ background: 'linear-gradient(135deg, #5B6CF0, #8E9EF7)', border: 'none' }}>
               {saving ? 'Створення...' : 'Створити'}
             </Button>
           </DialogFooter>

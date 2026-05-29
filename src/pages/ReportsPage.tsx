@@ -15,19 +15,19 @@ import { apiClient } from '@/api/client';
 // ── helpers ─────────────────────────────────────────────────────────────────
 function Badge({ text, color }: { text: string; color: string }) {
   const map: Record<string, { bg: string; fg: string }> = {
-    green:  { bg: '#DCFCE7', fg: '#15803D' },
+    green:  { bg: '#DCFCE7', fg: '#059669' },
     yellow: { bg: '#FEF9C3', fg: '#A16207' },
     red:    { bg: '#FEE2E2', fg: '#B91C1C' },
-    blue:   { bg: '#DBEAFE', fg: '#1D4ED8' },
+    blue:   { bg: '#FCE7F3', fg: '#5A68C0' },
     purple: { bg: '#EDE9FE', fg: '#6D28D9' },
-    gray:   { bg: '#F1F5F9', fg: '#475569' },
+    gray:   { bg: '#F2F4F8', fg: '#475569' },
   };
   const s = map[color] ?? map.gray;
   return (
     <span style={{
       background: s.bg, color: s.fg,
       fontSize: 11, fontWeight: 700,
-      padding: '2px 8px', borderRadius: 20,
+      padding: '2px 8px', borderRadius: 6,
       display: 'inline-block',
     }}>{text}</span>
   );
@@ -36,7 +36,7 @@ function Badge({ text, color }: { text: string; color: string }) {
 function SectionHeader({ title, count, color, onCsv, onExcel, onPdf, icon: Icon, open, onToggle }: any) {
   return (
     <div className="flex items-center justify-between px-5 py-4 cursor-pointer select-none"
-      style={{ borderBottom: open ? '1px solid #F1F5F9' : 'none' }}
+      style={{ borderBottom: open ? '1px solid #F2F4F8' : 'none' }}
       onClick={onToggle}>
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-lg flex items-center justify-center"
@@ -51,23 +51,16 @@ function SectionHeader({ title, count, color, onCsv, onExcel, onPdf, icon: Icon,
       <div className="flex items-center gap-2">
         {onCsv && (
           <button onClick={e => { e.stopPropagation(); onCsv(); }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all"
-            style={{ background: 'rgba(29,78,216,0.08)', border: '1px solid rgba(29,78,216,0.2)', color: '#1D4ED8' }}>
-            <Download className="h-3 w-3" /> CSV
+            className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
+            style={{ background: '#EEF0FD', border: '1px solid #6B7FD4', color: '#5A68C0', cursor: 'pointer' }}>
+            <Download className="h-4 w-4" /> CSV
           </button>
         )}
         {onExcel && (
           <button onClick={e => { e.stopPropagation(); onExcel(); }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all"
-            style={{ background: 'rgba(21,128,61,0.08)', border: '1px solid rgba(21,128,61,0.2)', color: '#15803D' }}>
-            <FileSpreadsheet className="h-3 w-3" /> Excel
-          </button>
-        )}
-        {onPdf && (
-          <button onClick={e => { e.stopPropagation(); onPdf(); }}
-            className="flex items-center gap-1 px-2.5 py-1 rounded text-xs font-medium transition-all"
-            style={{ background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', color: '#DC2626' }}>
-            <File className="h-3 w-3" /> PDF
+            className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
+            style={{ background: '#DCFCE7', border: '1px solid #16A34A', color: '#15803D', cursor: 'pointer' }}>
+            <FileSpreadsheet className="h-4 w-4" /> Excel
           </button>
         )}
         {open ? <ChevronUp className="h-4 w-4 text-slate-400 ml-1" /> : <ChevronDown className="h-4 w-4 text-slate-400 ml-1" />}
@@ -110,6 +103,11 @@ export default function ReportsPage() {
   useEffect(() => { loadAll(); }, []);
 
   // Handlers
+  const handleAbcExcel = async () => {
+    try { await downloadAbcXyzExcel(); toast.success('Excel завантажено'); }
+    catch { toast.error('Помилка'); }
+  };
+
   const handleAbcCsv = () => {
     downloadCsv(abcData.map(i => ({
       'Назва': i.productName, 'SKU': i.sku, 'ABC': i.abcClass, 'XYZ': i.xyzClass,
@@ -117,14 +115,6 @@ export default function ReportsPage() {
       'Частка %': ((i.revenueShare ?? 0) * 100).toFixed(2), 'CV %': Number(i.cv).toFixed(1),
     })), 'abc_xyz.csv');
     toast.success('CSV завантажено');
-  };
-  const handleAbcExcel = async () => {
-    try { await downloadAbcXyzExcel(); toast.success('Excel завантажено'); }
-    catch { toast.error('Помилка'); }
-  };
-  const handleAbcPdf = async () => {
-    try { await downloadAbcXyzPdf(); toast.success('PDF завантажено'); }
-    catch { toast.error('Помилка'); }
   };
   const handleReorderCsv = () => {
     downloadCsv(reorderData.map(i => ({
@@ -172,24 +162,24 @@ export default function ReportsPage() {
     <div className="space-y-5">
 
       {/* Header */}
-      <div className="rounded-xl overflow-hidden" style={{
-        background: 'linear-gradient(135deg, #0C1628 0%, #1E293B 60%, #0A1220 100%)',
+      <div className="rounded-lg overflow-hidden" style={{
+        background: 'linear-gradient(135deg, #2A3050 0%, #3D4F7C 100%)',
         padding: '24px 28px',
       }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #0369A1, #38BDF8)' }}>
+              style={{ background: 'rgba(255,255,255,0.25)' }}>
               <FileText className="h-5 w-5 text-white" />
             </div>
             <div>
               <h1 className="text-2xl font-bold text-white">Звіти</h1>
-              <p className="text-sm" style={{ color: '#64748B' }}>Аналіз, експорт і перегляд даних</p>
+              <p className="text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>Аналіз, експорт і перегляд даних</p>
             </div>
           </div>
           <button onClick={loadAll} disabled={loading}
             className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium"
-            style={{ background: 'rgba(56,189,248,0.1)', border: '1px solid rgba(56,189,248,0.2)', color: '#38BDF8', cursor: 'pointer' }}>
+            style={{ background: 'rgba(255,255,255,0.2)', border: '1px solid rgba(255,255,255,0.3)', color: 'white', cursor: 'pointer' }}>
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             Оновити
           </button>
@@ -198,15 +188,15 @@ export default function ReportsPage() {
         {/* Summary KPIs */}
         {!loading && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-5 pt-5"
-            style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+            style={{ borderTop: '1px solid rgba(255,255,255,0.25)' }}>
             {[
-              { label: 'Виручка за період', value: (totalRevenue / 1000).toFixed(1) + ' тис грн', color: '#4ADE80' },
+              { label: 'Виручка за період', value: (totalRevenue / 1000).toFixed(1) + ' тис грн', color: 'white' },
               { label: 'Продажів', value: salesData.length, color: 'white' },
-              { label: 'Товарів клас A', value: classACount, color: '#C084FC' },
-              { label: 'Критичних залишків', value: criticalCount || reorderData.length, color: criticalCount > 0 ? '#FB923C' : '#4ADE80' },
+              { label: 'Товарів клас A', value: classACount, color: 'white' },
+              { label: 'Критичних залишків', value: criticalCount || reorderData.length, color: criticalCount > 0 ? '#FDE68A' : 'white' },
             ].map(k => (
               <div key={k.label}>
-                <div className="text-xs mb-1" style={{ color: '#475569' }}>{k.label}</div>
+                <div className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>{k.label}</div>
                 <div className="text-xl font-bold" style={{ color: k.color }}>{k.value}</div>
               </div>
             ))}
@@ -215,7 +205,7 @@ export default function ReportsPage() {
       </div>
 
       {/* Sales period filter */}
-      <div className="rounded-xl border bg-white p-4 shadow-sm">
+      <div className="rounded-lg border bg-white p-4 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
           <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
             <Calendar className="h-4 w-4 text-slate-400" />
@@ -224,22 +214,22 @@ export default function ReportsPage() {
           <div>
             <label className="text-xs text-slate-400 block mb-1">Від</label>
             <input type="date" value={salesFrom} onChange={e => setSalesFrom(e.target.value)}
-              className="border rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400" />
+              className="border rounded px-3 py-1.5 text-sm focus:outline-none focus:border-pink-400" />
           </div>
           <div>
             <label className="text-xs text-slate-400 block mb-1">До</label>
             <input type="date" value={salesTo} onChange={e => setSalesTo(e.target.value)}
-              className="border rounded px-3 py-1.5 text-sm focus:outline-none focus:border-blue-400" />
+              className="border rounded px-3 py-1.5 text-sm focus:outline-none focus:border-pink-400" />
           </div>
           <button onClick={loadAll}
             className="flex items-center gap-2 px-4 py-2 rounded text-sm font-medium"
-            style={{ background: 'rgba(3,105,161,0.1)', border: '1px solid rgba(3,105,161,0.2)', color: '#0369A1', cursor: 'pointer' }}>
+            style={{ background: 'rgba(8,145,178,0.1)', border: '1px solid rgba(8,145,178,0.2)', color: '#0891B2', cursor: 'pointer' }}>
             <RefreshCw className="h-3.5 w-3.5" /> Застосувати
           </button>
           {salesData.length > 0 && (
             <div className="ml-auto text-sm text-slate-500">
               <strong className="text-slate-800">{salesData.length}</strong> записів ·{' '}
-              <strong className="text-blue-700">{(totalRevenue / 1000).toFixed(1)} тис грн</strong> ·{' '}
+              <strong className="text-pink-700">{(totalRevenue / 1000).toFixed(1)} тис грн</strong> ·{' '}
               середній чек <strong className="text-slate-700">{avgCheck.toFixed(0)} грн</strong>
             </div>
           )}
@@ -248,25 +238,25 @@ export default function ReportsPage() {
 
       {loading ? (
         <div className="space-y-3">
-          {[1,2,3].map(i => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}
+          {[1,2,3].map(i => <Skeleton key={i} className="h-24 w-full rounded-lg" />)}
         </div>
       ) : (
         <div className="space-y-4">
 
           {/* ── ABC/XYZ ── */}
-          <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+          <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
             <SectionHeader
               title="ABC/XYZ Аналіз" count={abcData.length}
-              color="linear-gradient(135deg, #1D4ED8, #3B82F6)"
+              color="linear-gradient(135deg, #6B7FD4, #8E9EF7)"
               icon={BarChart2} open={openSections.abc}
               onToggle={() => toggle('abc')}
-              onCsv={handleAbcCsv} onExcel={handleAbcExcel} onPdf={handleAbcPdf}
+              onCsv={handleAbcCsv} onExcel={handleAbcExcel}
             />
             {openSections.abc && abcData.length > 0 && (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr style={{ background: '#F8FAFC' }} className="border-b">
+                    <tr style={{ background: '#F5F6F8' }} className="border-b">
                       {['Товар', 'SKU', 'ABC', 'XYZ', 'Клас', 'Оборот', 'Частка', 'Стабільність', 'Рекомендація'].map((h, i) => (
                         <th key={h} className={`px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-400 ${i >= 5 && i <= 7 ? 'text-right' : 'text-left'}`}>{h}</th>
                       ))}
@@ -303,7 +293,7 @@ export default function ReportsPage() {
           </div>
 
           {/* ── Критичні залишки ── */}
-          <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+          <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
             <SectionHeader
               title="Критичні залишки" count={reorderData.length}
               color="linear-gradient(135deg, #C2410C, #F97316)"
@@ -315,7 +305,7 @@ export default function ReportsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr style={{ background: '#F8FAFC' }} className="border-b">
+                    <tr style={{ background: '#F5F6F8' }} className="border-b">
                       {['Товар', 'SKU', 'Склад', 'Залишок', 'ROP', 'EOQ', 'Страх. запас', 'Статус'].map((h, i) => (
                         <th key={h} className={`px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-400 ${i >= 3 && i <= 6 ? 'text-right' : 'text-left'}`}>{h}</th>
                       ))}
@@ -332,7 +322,7 @@ export default function ReportsPage() {
                           <td className="px-4 py-2.5 text-slate-500 text-xs">{item.warehouseName ?? '—'}</td>
                           <td className="px-4 py-2.5 text-right font-bold" style={{ color: '#C2410C' }}>{item.currentStock}</td>
                           <td className="px-4 py-2.5 text-right text-slate-500">{item.reorderPoint}</td>
-                          <td className="px-4 py-2.5 text-right font-semibold text-blue-700">{item.eoq}</td>
+                          <td className="px-4 py-2.5 text-right font-semibold text-pink-700">{item.eoq}</td>
                           <td className="px-4 py-2.5 text-right text-slate-400">{item.safetyStock}</td>
                           <td className="px-4 py-2.5">
                             <Badge text={isCritical ? 'Критично' : 'Замовити'} color={isCritical ? 'red' : 'yellow'} />
@@ -350,7 +340,7 @@ export default function ReportsPage() {
           </div>
 
           {/* ── Продажі ── */}
-          <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+          <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
             <SectionHeader
               title={`Продажі за період (${salesFrom} — ${salesTo})`}
               count={salesData.length}
@@ -386,7 +376,7 @@ export default function ReportsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr style={{ background: '#F8FAFC' }} className="border-b">
+                      <tr style={{ background: '#F5F6F8' }} className="border-b">
                         {['Дата', 'Товар', 'Склад', 'К-сть', 'Ціна', 'Сума', 'Автор'].map((h, i) => (
                           <th key={h} className={`px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-400 ${i >= 3 && i <= 5 ? 'text-right' : 'text-left'}`}>{h}</th>
                         ))}
@@ -408,7 +398,7 @@ export default function ReportsPage() {
                     </tbody>
                     {salesData.length > 0 && (
                       <tfoot>
-                        <tr style={{ background: '#F8FAFC' }} className="border-t">
+                        <tr style={{ background: '#F5F6F8' }} className="border-t">
                           <td colSpan={5} className="px-4 py-2.5 text-xs font-semibold text-slate-500">
                             Всього {salesData.length} записів
                           </td>
@@ -431,10 +421,10 @@ export default function ReportsPage() {
           </div>
 
           {/* ── Каталог товарів ── */}
-          <div className="rounded-xl border bg-white shadow-sm overflow-hidden">
+          <div className="rounded-lg border bg-white shadow-sm overflow-hidden">
             <SectionHeader
               title="Каталог товарів" count={productsData.length}
-              color="linear-gradient(135deg, #15803D, #22C55E)"
+              color="linear-gradient(135deg, #059669, #34D399)"
               icon={Package} open={openSections.products}
               onToggle={() => toggle('products')}
               onCsv={handleProductsCsv}
@@ -443,7 +433,7 @@ export default function ReportsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr style={{ background: '#F8FAFC' }} className="border-b">
+                    <tr style={{ background: '#F5F6F8' }} className="border-b">
                       {['Назва', 'SKU', 'Ціна', 'Од.', 'Категорія', 'Постачальник', 'Статус'].map((h, i) => (
                         <th key={h} className={`px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-400 ${i === 2 ? 'text-right' : 'text-left'}`}>{h}</th>
                       ))}
@@ -456,7 +446,7 @@ export default function ReportsPage() {
                         <td className="px-4 py-2.5 font-semibold text-slate-800">{p.name}</td>
                         <td className="px-4 py-2.5"><span className="font-mono text-xs bg-slate-100 px-2 py-0.5 rounded">{p.sku}</span></td>
                         <td className="px-4 py-2.5 text-right font-medium">{Number(p.unitPrice).toFixed(2)} грн</td>
-                        <td className="px-4 py-2.5"><span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded">{p.unitOfMeasure ?? 'шт'}</span></td>
+                        <td className="px-4 py-2.5"><span className="text-xs bg-pink-50 text-pink-600 px-2 py-0.5 rounded">{p.unitOfMeasure ?? 'шт'}</span></td>
                         <td className="px-4 py-2.5 text-slate-500">{p.categoryName ?? '—'}</td>
                         <td className="px-4 py-2.5 text-slate-500">{p.supplierName ?? '—'}</td>
                         <td className="px-4 py-2.5">

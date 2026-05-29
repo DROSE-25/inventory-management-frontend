@@ -128,18 +128,17 @@ export default function ProductsPage() {
 
       {/* Header */}
       <div className="rounded-lg overflow-hidden" style={{
-        background: 'linear-gradient(135deg, #0F2744 0%, #1E293B 60%, #0A1628 100%)',
+        background: 'linear-gradient(135deg, #2A3050 0%, #3D4F7C 100%)',
         padding: '24px 28px',
       }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)' }}>
+              style={{ background: 'rgba(255,255,255,0.25)' }}>
               <Package className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Товари</h1>
-              <p className="text-sm" style={{ color: '#64748B' }}>Управління каталогом товарів</p>
+              <p className="text-2xl font-semibold text-white">Управління каталогом товарів</p>
             </div>
           </div>
           {isAdmin && (
@@ -147,8 +146,7 @@ export default function ProductsPage() {
               onClick={openCreate}
               className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
               style={{
-                background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)',
-                color: 'white', border: 'none', cursor: 'pointer',
+                background: 'white', color: '#5B6CF0', border: 'none', cursor: 'pointer', fontWeight: '700',
               }}
             >
               <Plus className="h-4 w-4" />
@@ -215,26 +213,26 @@ export default function ProductsPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-md border bg-white overflow-hidden shadow-sm">
+      <div className="rounded-lg bg-white overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b" style={{ background: '#F8FAFC' }}>
-              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Назва</th>
-              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">SKU</th>
-              <th className="text-right px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Ціна</th>
-              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Од.</th>
-              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Категорія</th>
-              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Постачальник</th>
-              <th className="text-center px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Статус</th>
-              {isAdmin && <th className="text-center px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400">Дії</th>}
+            <tr style={{ background: '#3D4A6B' }}>
+              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Назва</th>
+              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">SKU</th>
+              <th className="text-right px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Ціна</th>
+              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Од.</th>
+              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Категорія</th>
+              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Постачальник</th>
+              <th className="text-center px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Статус</th>
+              {isAdmin && <th className="text-center px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Дії</th>}
             </tr>
           </thead>
           <tbody>
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
-                <tr key={i} className="border-b">
+                <tr key={i} className="border-b border-slate-100">
                   {Array.from({ length: isAdmin ? 8 : 7 }).map((_, j) => (
-                    <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-24" /></td>
+                    <td key={j} className="px-4 py-3.5"><Skeleton className="h-4 w-24" /></td>
                   ))}
                 </tr>
               ))
@@ -251,55 +249,65 @@ export default function ProductsPage() {
               </tr>
             ) : filteredProducts.map((prod, i) => (
               <tr key={prod.id}
-                className="border-b transition-colors hover:bg-blue-50/30"
-                style={{ background: i % 2 !== 0 ? 'rgba(248,250,252,0.6)' : undefined }}>
-                <td className="px-4 py-3">
+                className="border-b border-slate-100 transition-colors"
+                style={{ background: i % 2 !== 0 ? '#FAFAFA' : 'white' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(91,108,240,0.04)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = i % 2 !== 0 ? '#FAFAFA' : 'white'; }}
+              >
+                <td className="px-4 py-3.5">
                   <span className="font-semibold text-slate-800">{prod.name}</span>
                 </td>
-                <td className="px-4 py-3">
-                  <span className="font-mono text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded">
+                <td className="px-4 py-3.5">
+                  <span className="font-mono text-xs px-2 py-1 rounded-md font-medium" style={{ background: 'rgba(91,108,240,0.08)', color: '#6B7FD4' }}>
                     {prod.sku}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right">
-                  <span className="font-semibold text-slate-700">{prod.unitPrice?.toFixed(2)}</span>
+                <td className="px-4 py-3.5 text-right">
+                  <span className="font-bold text-slate-800">{prod.unitPrice?.toFixed(2)}</span>
                   <span className="text-slate-400 text-xs ml-1">грн</span>
                 </td>
-                <td className="px-4 py-3">
-                  <span className="inline-block text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded font-medium">
+                <td className="px-4 py-3.5">
+                  <span className="inline-block text-xs px-2 py-0.5 rounded-md font-semibold" style={{ background: '#F1F5F9', color: '#64748B' }}>
                     {prod.unitOfMeasure || 'шт'}
                   </span>
                 </td>
-                <td className="px-4 py-3">
+                <td className="px-4 py-3.5">
                   <span className="inline-flex items-center gap-1 text-slate-500 text-xs">
-                    <Tag className="h-3 w-3" />
+                    <Tag className="h-3 w-3 text-slate-300" />
                     {(prod as any).categoryName ?? (prod as any).category?.name ?? '—'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-slate-600">
+                <td className="px-4 py-3.5 text-slate-600 text-sm">
                   {(prod as any).supplierName ?? prod.supplier?.name ?? '—'}
                 </td>
-                <td className="px-4 py-3 text-center">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    prod.isActive
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-slate-100 text-slate-500'
-                  }`}>
+                <td className="px-4 py-3.5 text-center">
+                  <span style={{
+                    display: 'inline-flex', alignItems: 'center', padding: '3px 10px',
+                    borderRadius: 6, fontSize: 11, fontWeight: 600,
+                    background: prod.isActive ? '#DCFCE7' : '#F1F5F9',
+                    color: prod.isActive ? '#16A34A' : '#94A3B8',
+                  }}>
                     {prod.isActive ? 'Активний' : 'Неактивний'}
                   </span>
                 </td>
                 {isAdmin && (
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3.5">
                     <div className="flex justify-center gap-1.5">
                       <button
                         onClick={() => openEdit(prod)}
-                        className="w-8 h-8 rounded border border-slate-200 flex items-center justify-center text-slate-500 hover:text-blue-600 hover:border-blue-300 hover:bg-blue-50 transition-all"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                        style={{ background: 'rgba(91,108,240,0.08)', color: '#6B7FD4', border: 'none', cursor: 'pointer' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(91,108,240,0.18)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(91,108,240,0.08)'; }}
                       >
                         <Pencil className="h-3.5 w-3.5" />
                       </button>
                       <button
                         onClick={() => setDeleteId(prod.id)}
-                        className="w-8 h-8 rounded border border-slate-200 flex items-center justify-center text-slate-500 hover:text-red-600 hover:border-red-300 hover:bg-red-50 transition-all"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center transition-all"
+                        style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: 'none', cursor: 'pointer' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(220,38,38,0.15)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(220,38,38,0.06)'; }}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -408,7 +416,7 @@ export default function ProductsPage() {
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setFormOpen(false)} disabled={saving}>Скасувати</Button>
             <Button onClick={handleSave} disabled={saving}
-              style={{ background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', border: 'none' }}>
+              style={{ background: '#3D4A6B', border: 'none' }}>
               {saving ? 'Збереження...' : editItem ? 'Зберегти зміни' : 'Створити'}
             </Button>
           </DialogFooter>

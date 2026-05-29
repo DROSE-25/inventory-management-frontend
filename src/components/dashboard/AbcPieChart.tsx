@@ -20,7 +20,7 @@ export default function AbcPieChart({ items, selectedClass, onClassSelect }: Pro
   const countC = items.filter(i => i.abcClass === 'C').length;
 
   const classes = ['A', 'B', 'C'];
-  const colors  = ['#1E8449', '#D4A017', '#C0392B'];
+  const colors  = ['#22C55E', '#EAB308', '#EF4444'];
   const labels  = ['Клас A (пріоритет)', 'Клас B (середній)', 'Клас C (низький)'];
   const counts  = [countA, countB, countC];
 
@@ -48,9 +48,9 @@ export default function AbcPieChart({ items, selectedClass, onClassSelect }: Pro
         <CardContent>
           <div style={{ width: 280, height: 280, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <svg viewBox="0 0 100 100" width="200" height="200">
-              <circle cx="50" cy="50" r="40" fill="#1E8449" opacity="0.9"/>
-              <path d="M50,50 L50,10 A40,40 0 0,1 84,68 Z" fill="#D4A017"/>
-              <path d="M50,50 L84,68 A40,40 0 0,1 16,68 Z" fill="#C0392B"/>
+              <circle cx="50" cy="50" r="40" fill="#22C55E" opacity="0.9"/>
+              <path d="M50,50 L50,10 A40,40 0 0,1 84,68 Z" fill="#EAB308"/>
+              <path d="M50,50 L84,68 A40,40 0 0,1 16,68 Z" fill="#EF4444"/>
               <text x="30" y="38" fill="white" fontSize="12" fontWeight="bold">A</text>
               <text x="68" y="72" fill="white" fontSize="12" fontWeight="bold">B</text>
               <text x="28" y="72" fill="white" fontSize="12" fontWeight="bold">C</text>
@@ -81,7 +81,7 @@ export default function AbcPieChart({ items, selectedClass, onClassSelect }: Pro
             Фільтр: Клас {selectedClass} —{' '}
             <button
               onClick={() => onClassSelect?.(null)}
-              className="text-blue-500 hover:underline"
+              className="text-pink-500 hover:underline"
             >
               скинути
             </button>

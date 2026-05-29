@@ -24,7 +24,7 @@ function Tooltip({ text, align = 'center' }: { text: string; align?: 'center' | 
       {show && (
         <span style={{
           position: 'absolute', top: '120%', ...leftStyle,
-          background: '#1E293B', color: 'white', fontSize: '11px', padding: '6px 10px',
+          background: '#16213E', color: 'white', fontSize: '11px', padding: '6px 10px',
           borderRadius: '6px', zIndex: 50, lineHeight: '1.5',
           boxShadow: '0 4px 12px rgba(0,0,0,0.2)', width: '220px', textAlign: 'left',
           fontWeight: 'normal', textTransform: 'none', letterSpacing: 'normal',
@@ -33,7 +33,7 @@ function Tooltip({ text, align = 'center' }: { text: string; align?: 'center' | 
           <span style={{
             position: 'absolute', bottom: '100%', ...arrowStyle,
             borderWidth: '4px', borderStyle: 'solid',
-            borderColor: 'transparent transparent #1E293B transparent',
+            borderColor: 'transparent transparent #16213E transparent',
           }} />
         </span>
       )}
@@ -42,7 +42,7 @@ function Tooltip({ text, align = 'center' }: { text: string; align?: 'center' | 
 }
 
 function getGrade(mape: number) {
-  if (mape < 10) return { label: 'Відмінно', bg: '#DCFCE7', color: '#15803D' };
+  if (mape < 10) return { label: 'Відмінно', bg: '#DCFCE7', color: '#059669' };
   if (mape < 20) return { label: 'Добре',    bg: '#D1FAE5', color: '#047857' };
   if (mape < 35) return { label: 'Прийнятно',bg: '#FEF9C3', color: '#A16207' };
   if (mape < 50) return { label: 'Задовільно',bg: '#FFEDD5', color: '#C2410C' };
@@ -121,7 +121,7 @@ export default function CompareTable({ results, bestMethod }: {
         </div>
         <div className="px-4 py-3 border-t bg-slate-50 flex flex-wrap gap-3">
           {[
-            { label: 'Відмінно',   range: '< 10%',   bg: '#DCFCE7', color: '#15803D' },
+            { label: 'Відмінно',   range: '< 10%',   bg: '#DCFCE7', color: '#059669' },
             { label: 'Добре',      range: '10–20%',  bg: '#D1FAE5', color: '#047857' },
             { label: 'Прийнятно', range: '20–35%',  bg: '#FEF9C3', color: '#A16207' },
             { label: 'Задовільно', range: '35–50%',  bg: '#FFEDD5', color: '#C2410C' },

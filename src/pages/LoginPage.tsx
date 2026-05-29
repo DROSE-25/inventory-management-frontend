@@ -39,7 +39,7 @@ export default function LoginPage() {
       minHeight: '100vh',
       display: 'flex',
       fontFamily: "'DM Sans', 'Segoe UI', sans-serif",
-      background: '#0F172A',
+      background: '#1A1A2E',
     }}>
       {/* Left panel */}
       <div style={{
@@ -48,7 +48,7 @@ export default function LoginPage() {
         flexDirection: 'column',
         justifyContent: 'space-between',
         padding: '48px',
-        background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #0F172A 100%)',
+        background: 'linear-gradient(135deg, #1A1A2E 0%, #151521 50%, #1A1A2E 100%)',
         position: 'relative',
         overflow: 'hidden',
       }}>
@@ -56,13 +56,13 @@ export default function LoginPage() {
         <div style={{
           position: 'absolute', top: '-80px', left: '-80px',
           width: '400px', height: '400px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(91,108,240,0.12) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
         <div style={{
           position: 'absolute', bottom: '-100px', right: '-60px',
           width: '500px', height: '500px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%)',
+          background: 'radial-gradient(circle, rgba(139,92,246,0.1) 0%, transparent 70%)',
           pointerEvents: 'none',
         }} />
 
@@ -70,13 +70,13 @@ export default function LoginPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', position: 'relative' }}>
           <div style={{
             width: '42px', height: '42px', borderRadius: '6px',
-            background: 'linear-gradient(135deg, #3B82F6, #6366F1)',
+            background: '#3D4A6B',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <Package2 size={22} color="white" />
           </div>
           <div>
-            <div style={{ color: 'white', fontWeight: '700', fontSize: '16px', lineHeight: 1 }}>Склад і запаси</div>
+            <div style={{ color: 'white', fontWeight: '600', fontSize: '16px', lineHeight: 1 }}>Склад і запаси</div>
             <div style={{ color: '#64748B', fontSize: '12px', marginTop: '2px' }}></div>
           </div>
         </div>
@@ -85,12 +85,12 @@ export default function LoginPage() {
         <div style={{ position: 'relative' }}>
           <div style={{
             display: 'inline-block',
-            background: 'rgba(59,130,246,0.15)',
-            border: '1px solid rgba(59,130,246,0.3)',
+            background: 'rgba(91,108,240,0.15)',
+            border: '1px solid rgba(74,90,212,0.3)',
             borderRadius: '6px',
             padding: '6px 14px',
             fontSize: '12px',
-            color: '#93C5FD',
+            color: '#E0E4FD',
             marginBottom: '24px',
             fontWeight: '500',
           }}>
@@ -99,14 +99,14 @@ export default function LoginPage() {
           <h1 style={{
             color: 'white',
             fontSize: '42px',
-            fontWeight: '800',
+            fontWeight: '600',
             lineHeight: '1.15',
             marginBottom: '20px',
             letterSpacing: '-0.5px',
           }}>
             Контроль запасів<br />
             <span style={{
-              background: 'linear-gradient(90deg, #3B82F6, #818CF8)',
+              background: 'linear-gradient(90deg, #6B7FD4, #8E9EF7)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
             }}>
@@ -127,15 +127,15 @@ export default function LoginPage() {
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                 <div style={{
                   width: '36px', height: '36px', borderRadius: '4px',
-                  background: 'rgba(59,130,246,0.1)',
-                  border: '1px solid rgba(59,130,246,0.2)',
+                  background: 'rgba(91,108,240,0.1)',
+                  border: '1px solid rgba(74,90,212,0.2)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}>
-                  <Icon size={16} color="#60A5FA" />
+                  <Icon size={16} color="#C7CFFB" />
                 </div>
                 <div>
-                  <div style={{ color: '#E2E8F0', fontSize: '13px', fontWeight: '600' }}>{label}</div>
+                  <div style={{ color: '#E8E9EC', fontSize: '13px', fontWeight: '600' }}>{label}</div>
                   <div style={{ color: '#64748B', fontSize: '12px' }}>{desc}</div>
                 </div>
               </div>
@@ -154,13 +154,13 @@ export default function LoginPage() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: '#1E293B',
+        background: '#151521',
         borderLeft: '1px solid rgba(255,255,255,0.05)',
         padding: '48px 40px',
       }}>
         <div style={{ width: '100%', maxWidth: '360px' }}>
           <h2 style={{
-            color: 'white', fontSize: '26px', fontWeight: '700',
+            color: 'white', fontSize: '26px', fontWeight: '600',
             marginBottom: '8px', letterSpacing: '-0.3px',
           }}>
             Вхід до системи
@@ -185,12 +185,12 @@ export default function LoginPage() {
                 autoComplete="username"
                 style={{
                   width: '100%', padding: '11px 14px', borderRadius: '4px',
-                  background: '#0F172A', border: '1px solid rgba(255,255,255,0.1)',
+                  background: '#1A1A2E', border: '1px solid rgba(255,255,255,0.1)',
                   color: 'white', fontSize: '14px', outline: 'none',
                   boxSizing: 'border-box',
                   transition: 'border-color 0.2s',
                 }}
-                onFocus={e => e.target.style.borderColor = '#3B82F6'}
+                onFocus={e => e.target.style.borderColor = '#6B7FD4'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
               />
             </div>
@@ -211,12 +211,12 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 style={{
                   width: '100%', padding: '11px 14px', borderRadius: '4px',
-                  background: '#0F172A', border: '1px solid rgba(255,255,255,0.1)',
+                  background: '#1A1A2E', border: '1px solid rgba(255,255,255,0.1)',
                   color: 'white', fontSize: '14px', outline: 'none',
                   boxSizing: 'border-box',
                   transition: 'border-color 0.2s',
                 }}
-                onFocus={e => e.target.style.borderColor = '#3B82F6'}
+                onFocus={e => e.target.style.borderColor = '#6B7FD4'}
                 onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
               />
             </div>
@@ -237,7 +237,7 @@ export default function LoginPage() {
               disabled={loading}
               style={{
                 width: '100%', padding: '12px',
-                background: loading ? '#1E40AF' : 'linear-gradient(135deg, #3B82F6, #6366F1)',
+                background: loading ? '#CC4444' : 'linear-gradient(135deg, #6B7FD4, #8E9EF7)',
                 border: 'none', borderRadius: '4px',
                 color: 'white', fontSize: '14px', fontWeight: '600',
                 cursor: loading ? 'not-allowed' : 'pointer',
@@ -254,16 +254,16 @@ export default function LoginPage() {
 
           <div style={{
             marginTop: '32px', padding: '16px',
-            background: 'rgba(59,130,246,0.05)',
-            border: '1px solid rgba(59,130,246,0.1)',
+            background: 'rgba(91,108,240,0.05)',
+            border: '1px solid rgba(91,108,240,0.1)',
             borderRadius: '4px',
           }}>
             <p style={{ color: '#475569', fontSize: '12px', marginBottom: '6px', fontWeight: '600' }}>
               Тестові дані:
             </p>
             <p style={{ color: '#64748B', fontSize: '12px' }}>
-              Логін: <span style={{ color: '#93C5FD' }}>admin</span> &nbsp;·&nbsp;
-              Пароль: <span style={{ color: '#93C5FD' }}>admin123</span>
+              Логін: <span style={{ color: '#E0E4FD' }}>admin</span> &nbsp;·&nbsp;
+              Пароль: <span style={{ color: '#E0E4FD' }}>admin123</span>
             </p>
           </div>
         </div>

@@ -19,8 +19,8 @@ export default function ReportCard({
     <Card>
       <CardHeader className="flex flex-row items-start justify-between pb-2">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-50 rounded-lg">
-            <FileText className="h-5 w-5 text-blue-600" />
+          <div className="p-2 bg-pink-50 rounded-lg">
+            <FileText className="h-5 w-5 text-pink-600" />
           </div>
           <div>
             <CardTitle className="text-base">{title}</CardTitle>

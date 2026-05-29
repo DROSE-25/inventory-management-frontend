@@ -23,7 +23,7 @@ function Tooltip({ text, align = 'center' }: { text: string; align?: 'center' | 
       {show && (
         <span style={{
           position: 'absolute', top: '120%', ...leftStyle,
-          background: '#1E293B', color: 'white', fontSize: '11px', padding: '6px 10px',
+          background: '#151521', color: 'white', fontSize: '11px', padding: '6px 10px',
           borderRadius: '6px', zIndex: 50, lineHeight: '1.5',
           boxShadow: '0 4px 12px rgba(0,0,0,0.2)', width: '220px', textAlign: 'left',
           fontWeight: 'normal', textTransform: 'none', letterSpacing: 'normal',
@@ -32,7 +32,7 @@ function Tooltip({ text, align = 'center' }: { text: string; align?: 'center' | 
           <span style={{
             position: 'absolute', bottom: '100%', ...arrowStyle,
             borderWidth: '4px', borderStyle: 'solid',
-            borderColor: 'transparent transparent #1E293B transparent',
+            borderColor: 'transparent transparent #151521 transparent',
           }} />
         </span>
       )}
@@ -62,7 +62,7 @@ export default function ReorderTable({ items }: { items: ReorderItem[] }) {
       <div className="flex items-center gap-2.5 px-5 py-4 border-b"
         style={{ background: 'rgba(249,115,22,0.04)' }}>
         <div className="w-8 h-8 rounded flex items-center justify-center"
-          style={{ background: 'linear-gradient(135deg, #C2410C, #F97316)' }}>
+          style={{ background: 'linear-gradient(135deg, #6B7FD4, #8E9EF7)' }}>
           <AlertTriangle className="h-4 w-4 text-white" />
         </div>
         <div>
@@ -113,14 +113,14 @@ export default function ReorderTable({ items }: { items: ReorderItem[] }) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <span className={`font-bold text-sm inline-flex items-center gap-1 ${isCritical ? 'text-red-600' : 'text-orange-500'}`}>
+                    <span className={`font-bold text-sm inline-flex items-center gap-1 ${isCritical ? 'text-red-600' : 'text-indigo-500'}`}>
                       {isCritical && <XCircle className="h-3 w-3" />}
                       {item.currentStock}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right text-slate-500">{item.reorderPoint}</td>
                   <td className="px-4 py-3 text-right">
-                    <span className="text-blue-600 font-semibold">{item.eoq}</span>
+                    <span className="text-pink-600 font-semibold">{item.eoq}</span>
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-500 max-w-xs">
                     <button

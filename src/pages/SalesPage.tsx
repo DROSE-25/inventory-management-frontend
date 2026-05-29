@@ -32,7 +32,7 @@ const emptyForm: SaleForm = {
   quantity: 1, unitPrice: 0, saleDate: today,
 };
 
-const WAREHOUSE_COLORS = ['#3B82F6', '#22C55E', '#F97316', '#A855F7', '#EF4444'];
+const WAREHOUSE_COLORS = ['#6B7FD4', '#34D399', '#F97316', '#A855F7', '#EF4444'];
 const CHART_MODES = [
   { key: 'revenue', label: 'Виручка, грн' },
   { key: 'quantity', label: 'Кількість, шт' },
@@ -220,18 +220,17 @@ export default function SalesPage() {
 
       {/* Header */}
       <div className="rounded-lg overflow-hidden" style={{
-        background: 'linear-gradient(135deg, #0A1628 0%, #1E293B 60%, #0F1F35 100%)',
+        background: 'linear-gradient(135deg, #2A3050 0%, #3D4F7C 100%)',
         padding: '24px 28px',
       }}>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg, #15803D, #22C55E)' }}>
+              style={{ background: 'rgba(255,255,255,0.25)' }}>
               <ShoppingCart className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-white tracking-tight">Продажі</h1>
-              <p className="text-sm" style={{ color: '#64748B' }}>Реєстрація та перегляд продажів</p>
+              <p className="text-2xl font-semibold text-white">Реєстрація та перегляд продажів</p>
             </div>
           </div>
           {canCreate && (
@@ -239,8 +238,7 @@ export default function SalesPage() {
               onClick={openCreate}
               className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
               style={{
-                background: 'linear-gradient(135deg, #15803D, #22C55E)',
-                color: 'white', border: 'none', cursor: 'pointer',
+                background: 'white', color: '#5B6CF0', border: 'none', cursor: 'pointer', fontWeight: '700',
               }}
             >
               <Plus className="h-4 w-4" />
@@ -250,19 +248,19 @@ export default function SalesPage() {
         </div>
 
         {!loading && sales.length > 0 && (
-          <div className="flex gap-6 mt-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="flex gap-6 mt-5 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.25)' }}>
             <div>
-              <div className="text-xs mb-1" style={{ color: '#475569' }}>Записів за період</div>
+              <div className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Записів за період</div>
               <div className="text-xl font-bold text-white">{allSales.length || sales.length}</div>
             </div>
             <div>
-              <div className="text-xs mb-1" style={{ color: '#475569' }}>Загальна сума</div>
-              <div className="text-xl font-bold" style={{ color: '#4ADE80' }}>
+              <div className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Загальна сума</div>
+              <div className="text-xl font-bold" style={{ color: 'white' }}>
                 {totalSum >= 1000 ? (totalSum / 1000).toFixed(1) + ' тис' : totalSum.toFixed(0)} грн
               </div>
             </div>
             <div>
-              <div className="text-xs mb-1" style={{ color: '#475569' }}>Середній чек</div>
+              <div className="text-xs mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>Середній чек</div>
               <div className="text-xl font-bold text-white">
                 {sales.length > 0 ? (totalSum / sales.length).toFixed(0) : 0} грн
               </div>
@@ -272,7 +270,7 @@ export default function SalesPage() {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-end p-4 bg-white border rounded-xl shadow-sm">
+      <div className="flex flex-wrap gap-3 items-end p-4 bg-white border rounded-lg shadow-sm">
         <div className="flex items-center gap-2 mr-1">
           <Calendar className="h-4 w-4 text-slate-400" />
           <span className="text-sm font-medium text-slate-600">Період:</span>
@@ -296,7 +294,7 @@ export default function SalesPage() {
       </div>
 
       {/* Charts */}
-      <div className="bg-white border rounded-xl shadow-sm p-5">
+      <div className="bg-white border rounded-lg shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <BarChart2 className="h-4 w-4 text-slate-400" />
@@ -310,7 +308,7 @@ export default function SalesPage() {
                   onClick={() => setChartMode(m.key as any)}
                   className="px-3 py-1.5 transition-colors"
                   style={{
-                    background: chartMode === m.key ? '#1E293B' : 'white',
+                    background: chartMode === m.key ? '#6B7FD4' : 'white',
                     color: chartMode === m.key ? 'white' : '#64748B',
                   }}>
                   {m.label}
@@ -324,7 +322,7 @@ export default function SalesPage() {
                   onClick={() => setChartType(t)}
                   className="px-3 py-1.5 transition-colors"
                   style={{
-                    background: chartType === t ? '#1E293B' : 'white',
+                    background: chartType === t ? '#6B7FD4' : 'white',
                     color: chartType === t ? 'white' : '#64748B',
                   }}>
                   {t === 'line' ? 'Лінія' : 'Стовпці'}
@@ -354,12 +352,12 @@ export default function SalesPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-md border bg-white overflow-hidden shadow-sm">
+      <div className="rounded-lg bg-white overflow-hidden" style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.06)' }}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b" style={{ background: '#F8FAFC' }}>
+            <tr style={{ background: '#3D4A6B' }}>
               {['Дата', 'Товар', 'Склад', 'К-сть', 'Ціна, грн', 'Сума, грн', 'Автор', ''].map((h, i) => (
-                <th key={h} className={`px-4 py-3 font-semibold text-xs uppercase tracking-wide text-slate-400 ${i >= 3 && i <= 5 ? 'text-right' : 'text-left'}`}>
+                <th key={h} className={`px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80 ${i >= 3 && i <= 5 ? 'text-right' : 'text-left'}`}>
                   {h}
                 </th>
               ))}
@@ -368,9 +366,9 @@ export default function SalesPage() {
           <tbody>
             {loading ? (
               Array.from({ length: 6 }).map((_, i) => (
-                <tr key={i} className="border-b">
+                <tr key={i} className="border-b border-slate-100">
                   {Array.from({ length: 7 }).map((_, j) => (
-                    <td key={j} className="px-4 py-3"><Skeleton className="h-4 w-20" /></td>
+                    <td key={j} className="px-4 py-3.5"><Skeleton className="h-4 w-20" /></td>
                   ))}
                 </tr>
               ))
@@ -387,35 +385,41 @@ export default function SalesPage() {
               </tr>
             ) : sales.map((s, i) => (
               <tr key={s.id}
-                className="border-b transition-colors hover:bg-green-50/20"
-                style={{ background: i % 2 !== 0 ? 'rgba(248,250,252,0.6)' : undefined }}>
-                <td className="px-4 py-3">
-                  <span className="text-slate-500 text-xs font-medium">{s.saleDate}</span>
+                className="border-b border-slate-100 transition-colors"
+                style={{ background: i % 2 !== 0 ? '#FAFAFA' : 'white' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(91,108,240,0.04)'; }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = i % 2 !== 0 ? '#FAFAFA' : 'white'; }}
+              >
+                <td className="px-4 py-3.5">
+                  <span className="text-xs font-semibold px-2 py-1 rounded-md" style={{ background: 'rgba(91,108,240,0.08)', color: '#6B7FD4' }}>{s.saleDate}</span>
                 </td>
-                <td className="px-4 py-3 font-semibold text-slate-800">
+                <td className="px-4 py-3.5 font-semibold text-slate-800">
                   {(s as any).productName ?? s.product?.name ?? '—'}
                 </td>
-                <td className="px-4 py-3">
-                  <span className="text-slate-500 text-xs bg-slate-100 px-2 py-0.5 rounded">
+                <td className="px-4 py-3.5">
+                  <span className="text-xs px-2 py-0.5 rounded-md font-medium" style={{ background: '#F1F5F9', color: '#64748B' }}>
                     {(s as any).warehouseName ?? s.warehouse?.name ?? '—'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right font-medium text-slate-700">
+                <td className="px-4 py-3.5 text-right font-bold text-slate-700">
                   {s.quantity}
-                  <span className="text-slate-400 text-xs ml-1">
+                  <span className="text-slate-400 text-xs ml-1 font-normal">
                     {(s as any).unitOfMeasure ?? s.product?.unitOfMeasure ?? 'шт'}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-right text-slate-500">{Number(s.unitPrice).toFixed(2)}</td>
-                <td className="px-4 py-3 text-right">
-                  <span className="font-bold text-slate-800">{rowSum(s)}</span>
+                <td className="px-4 py-3.5 text-right text-slate-500">{Number(s.unitPrice).toFixed(2)}</td>
+                <td className="px-4 py-3.5 text-right">
+                  <span className="font-semibold" style={{ color: '#6B7FD4' }}>{rowSum(s)}</span>
                 </td>
-                <td className="px-4 py-3 text-slate-400 text-xs">{s.createdBy ?? '—'}</td>
+                <td className="px-4 py-3.5 text-slate-400 text-xs">{s.createdBy ?? '—'}</td>
                 {canCreate && (
-                  <td className="px-4 py-3 text-center">
+                  <td className="px-4 py-3.5 text-center">
                     <button
                       onClick={() => handleDelete(s.id)}
-                      className="w-7 h-7 rounded border border-slate-200 flex items-center justify-center text-slate-300 hover:text-red-500 hover:border-red-300 hover:bg-red-50 transition-all mx-auto"
+                      className="w-7 h-7 rounded-lg flex items-center justify-center mx-auto transition-all"
+                      style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: 'none', cursor: 'pointer' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(220,38,38,0.15)'; }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(220,38,38,0.06)'; }}
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
@@ -492,7 +496,7 @@ export default function SalesPage() {
                     Залишок на складі:
                   </span>
                   <span className="text-sm font-bold"
-                    style={{ color: stockInfo.qty <= 0 ? '#B91C1C' : stockInfo.qty < 10 ? '#C2410C' : '#15803D' }}>
+                    style={{ color: stockInfo.qty <= 0 ? '#B91C1C' : stockInfo.qty < 10 ? '#C2410C' : '#059669' }}>
                     {stockInfo.qty <= 0 ? '⛔ Немає на складі' : stockInfo.qty < 10 ? `⚠️ ${stockInfo.qty} шт (мало)` : `✓ ${stockInfo.qty} шт`}
                   </span>
                 </div>
@@ -528,7 +532,7 @@ export default function SalesPage() {
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={() => setFormOpen(false)} disabled={saving}>Скасувати</Button>
             <Button onClick={handleSave} disabled={saving}
-              style={{ background: 'linear-gradient(135deg, #15803D, #22C55E)', border: 'none' }}>
+              style={{ background: 'rgba(255,255,255,0.25)', border: 'none' }}>
               {saving ? 'Збереження...' : 'Зареєструвати'}
             </Button>
           </DialogFooter>

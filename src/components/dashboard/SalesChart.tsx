@@ -33,8 +33,8 @@ export default function SalesChart({ points }: { points: SalePoint[] }) {
       {
         label: 'Кількість продажів',
         data: points.map(p => p.quantity),
-        borderColor: '#3B82F6',
-        backgroundColor: 'rgba(59,130,246,0.08)',
+        borderColor: '#F06B8A',
+        backgroundColor: 'rgba(240,107,138,0.08)',
         borderWidth: 2,
         pointRadius: 2,
         pointHoverRadius: 5,

@@ -10,8 +10,8 @@ const SECTIONS = [
     id: 'intro',
     icon: BookOpen,
     title: 'Що таке ця система?',
-    color: '#2563EB',
-    bg: '#EFF6FF',
+    color: '#5A68C0',
+    bg: '#FFF1F5',
     content: [
       {
         type: 'text',
@@ -52,13 +52,13 @@ const SECTIONS = [
           },
           {
             role: 'Менеджер',
-            color: '#1D4ED8',
+            color: '#5A68C0',
             desc: 'Робочий користувач. Реєструє продажі, додає товари і постачальників.',
             can: ['Додавати товари, постачальники, склади', 'Реєструвати продажі', 'Переглядати всі дані'],
           },
           {
             role: 'Аналітик',
-            color: '#15803D',
+            color: '#059669',
             desc: 'Тільки перегляд. Може дивитися дані, прогнози і звіти, але не змінювати.',
             can: ['Переглядати товари, продажі, склади', 'Запускати прогнози', 'Завантажувати звіти'],
           },
@@ -70,8 +70,8 @@ const SECTIONS = [
     id: 'products',
     icon: Package,
     title: 'Товари – каталог',
-    color: '#2563EB',
-    bg: '#EFF6FF',
+    color: '#5A68C0',
+    bg: '#FFF1F5',
     content: [
       {
         type: 'text',
@@ -130,7 +130,7 @@ const SECTIONS = [
     id: 'warehouses',
     icon: Warehouse,
     title: 'Склади',
-    color: '#0369A1',
+    color: '#0891B2',
     bg: '#F0F9FF',
     content: [
       {
@@ -157,7 +157,7 @@ const SECTIONS = [
     id: 'sales',
     icon: ShoppingCart,
     title: 'Продажі – реєстрація',
-    color: '#15803D',
+    color: '#059669',
     bg: '#F0FDF4',
     content: [
       {
@@ -266,7 +266,7 @@ const SECTIONS = [
     id: 'abc',
     icon: BarChart3,
     title: 'ABC/XYZ аналіз',
-    color: '#15803D',
+    color: '#059669',
     bg: '#F0FDF4',
     content: [
       {
@@ -301,7 +301,7 @@ const SECTIONS = [
     id: 'reports',
     icon: FileText,
     title: 'Звіти',
-    color: '#0369A1',
+    color: '#0891B2',
     bg: '#F0F9FF',
     content: [
       {
@@ -378,7 +378,7 @@ export default function HelpPage() {
         </p>
         <div className="flex gap-3 mt-4">
           <button onClick={expandAll}
-            className="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+            className="text-xs text-pink-600 hover:text-pink-800 font-medium flex items-center gap-1">
             <ChevronDown className="h-3 w-3" /> Розгорнути все
           </button>
           <span className="text-slate-300">·</span>
@@ -395,7 +395,7 @@ export default function HelpPage() {
         const Icon = section.icon;
         return (
           <div key={section.id} className="border bg-white overflow-hidden"
-            style={{ borderRadius: '8px', borderColor: '#E2E8F0' }}>
+            style={{ borderRadius: '8px', borderColor: '#E8E9EC' }}>
 
             {/* Section header */}
             <button
@@ -417,7 +417,7 @@ export default function HelpPage() {
 
             {/* Section content */}
             {isOpen && (
-              <div className="px-5 pb-5 space-y-4" style={{ borderTop: '1px solid #F1F5F9' }}>
+              <div className="px-5 pb-5 space-y-4" style={{ borderTop: '1px solid #F2F4F8' }}>
                 {section.content.map((block: any, bi) => {
                   if (block.type === 'text') {
                     return (
@@ -441,7 +441,7 @@ export default function HelpPage() {
                     return (
                       <div key={bi} className="flex gap-3 px-4 py-3 rounded"
                         style={{ background: '#FFF7ED', border: '1px solid #FED7AA' }}>
-                        <AlertTriangle className="h-4 w-4 text-orange-500 flex-shrink-0 mt-0.5" />
+                        <AlertTriangle className="h-4 w-4 text-indigo-500 flex-shrink-0 mt-0.5" />
                         <p className="text-sm text-orange-800">{block.value}</p>
                       </div>
                     );
@@ -490,7 +490,7 @@ export default function HelpPage() {
                     return (
                       <div key={bi} className="space-y-3 pt-4">
                         {block.items!.map((r: any, ri: number) => (
-                          <div key={r.role} className="border rounded p-4" style={{ borderColor: '#E2E8F0' }}>
+                          <div key={r.role} className="border rounded p-4" style={{ borderColor: '#E8E9EC' }}>
                             <div className="flex items-center gap-2 mb-2">
                               <span className="text-xs font-bold px-2 py-0.5 rounded"
                                 style={{ background: `${r.color}15`, color: r.color }}>
