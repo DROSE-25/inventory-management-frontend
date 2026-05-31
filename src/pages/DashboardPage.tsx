@@ -117,6 +117,32 @@ export default function DashboardPage() {
             </>
           )}
         </div>
+
+        {/* Підказка якщо ABC не перераховано */}
+        {!loading && abcItems.length === 0 && (
+          <div style={{
+            marginTop: 12,
+            background: 'rgba(251,191,36,0.12)',
+            border: '1px solid rgba(251,191,36,0.35)',
+            borderRadius: 8,
+            padding: '10px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}>
+            <span style={{ fontSize: 16 }}>💡</span>
+            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.85)' }}>
+              Дані не відображаються? Перейдіть у{' '}
+              <span
+                onClick={() => navigate('/reports')}
+                style={{ color: '#FCD34D', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}
+              >
+                Звіти
+              </span>
+              {' '}і натисніть <strong style={{ color: '#FCD34D' }}>«🔄 Перерахувати»</strong> в блоці ABC/XYZ Аналіз.
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Main content */}

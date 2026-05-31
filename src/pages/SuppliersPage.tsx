@@ -36,7 +36,7 @@ export default function SuppliersPage() {
 
   const load = async () => {
     setLoading(true);
-    try { setSuppliers(await getSuppliers()); }
+    try { const data = await getSuppliers(); setSuppliers(data.filter((s: any) => s.isActive !== false)); }
     catch { setSuppliers([]); }
     finally { setLoading(false); }
   };

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Search, Package, Tag } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Package, Tag, Settings2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -20,10 +20,13 @@ import {
   getProducts, createProduct, updateProduct,
   deleteProduct, getAllSuppliers, getCategories
 } from '@/api/products';
+import { apiClient } from '@/api/client';
 import type { Product, ProductForm } from '@/types/product';
 import type { Supplier } from '@/types/supplier';
 
 interface Category { id: number; name: string; }
+interface Warehouse { id: number; name: string; }
+interface ProductStock { warehouseName: string; quantity: number; }
 
 const emptyForm: ProductForm = {
   name: '', sku: '', unitPrice: 0,
@@ -51,10 +54,25 @@ export default function ProductsPage() {
   const [saving, setSaving]       = useState(false);
   const [formError, setFormError] = useState('');
 
-  const [deleteId, setDeleteId]       = useState<number | null>(null);
-  const [deleting, setDeleting]       = useState(false);
+  const [deleteId, setDeleteId]             = useState<number | null>(null);
+  const [deleting, setDeleting]             = useState(false);
   const [filterCategory, setFilterCategory] = useState('');
   const [filterSupplier, setFilterSupplier] = useState('');
+  const [filterWarehouse, setFilterWarehouse] = useState('');
+
+  const [warehouses, setWarehouses]   = useState<Warehouse[]>([]);
+  // productId -> список складів з кількістю
+  const [productStocks, setProductStocks] = useState<Record<number, ProductStock[]>>({});
+
+  // ── Керування категоріями ──────────────────────────────────
+  const [catOpen, setCatOpen]         = useState(false);
+  const [newCatName, setNewCatName]   = useState('');
+  const [catSaving, setCatSaving]     = useState(false);
+  const [deleteCatId, setDeleteCatId] = useState<number | null>(null);
+  const [deletingCat, setDeletingCat] = useState(false);
+
+  const loadCategories = () =>
+    getCategories().then(setCategories).catch(() => {});
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -62,6 +80,23 @@ export default function ProductsPage() {
       const data = await getProducts(page, 20, search);
       setProducts(data.content);
       setTotalPages(data.totalPages);
+      // Завантажуємо склади для кожного товару
+      const stocks: Record<number, ProductStock[]> = {};
+      await Promise.all(
+        data.content.map(async (prod) => {
+          try {
+            const res = await apiClient.get(`/stock/product/${prod.id}`);
+            const items = Array.isArray(res.data) ? res.data : res.data.content ?? [];
+            stocks[prod.id] = items.map((s: any) => ({
+              warehouseName: s.warehouseName,
+              quantity: Number(s.quantity),
+            }));
+          } catch {
+            stocks[prod.id] = [];
+          }
+        })
+      );
+      setProductStocks(stocks);
     } catch {
       setProducts([]);
     } finally {
@@ -72,7 +107,12 @@ export default function ProductsPage() {
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
     getAllSuppliers().then(setSuppliers).catch(() => {});
-    getCategories().then(setCategories).catch(() => {});
+    loadCategories();
+    // Завантажуємо склади для фільтру
+    apiClient.get('/warehouses').then(res => {
+      const data = Array.isArray(res.data) ? res.data : res.data.content ?? [];
+      setWarehouses(data.map((w: any) => ({ id: w.id, name: w.name })));
+    }).catch(() => {});
   }, []);
 
   const filteredProducts = products.filter(prod => {
@@ -80,6 +120,10 @@ export default function ProductsPage() {
     const supName = (prod as any).supplierName ?? (prod as any).supplier?.name ?? '';
     if (filterCategory && catName !== filterCategory) return false;
     if (filterSupplier && supName !== filterSupplier) return false;
+    if (filterWarehouse) {
+      const stocks = productStocks[prod.id] ?? [];
+      if (!stocks.some(s => s.warehouseName === filterWarehouse && s.quantity > 0)) return false;
+    }
     return true;
   });
 
@@ -93,7 +137,7 @@ export default function ProductsPage() {
       name: p.name, sku: p.sku, unitPrice: p.unitPrice,
       unitOfMeasure: p.unitOfMeasure, orderingCost: p.orderingCost,
       supplierId: p.supplier?.id ?? 0,
-      categoryId: (p as any).category?.id ?? 0,
+      categoryId: (p as any).categoryId ?? (p as any).category?.id ?? 0,
       holdingCostRate: (p as any).holdingCostRate ?? 0.25,
       serviceLevel: (p as any).serviceLevel ?? 0.95,
     });
@@ -123,6 +167,33 @@ export default function ProductsPage() {
     } catch { setDeleteId(null); } finally { setDeleting(false); }
   };
 
+  // ── Дії з категоріями ──────────────────────────────────────
+  const handleCreateCategory = async () => {
+    if (!newCatName.trim()) return;
+    setCatSaving(true);
+    try {
+      await apiClient.post('/categories', { name: newCatName.trim() });
+      setNewCatName('');
+      await loadCategories();
+      toast.success('Категорію створено');
+    } catch (e: any) {
+      toast.error(e.response?.data?.message ?? 'Помилка створення категорії');
+    } finally { setCatSaving(false); }
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!deleteCatId) return;
+    setDeletingCat(true);
+    try {
+      await apiClient.delete(`/categories/${deleteCatId}`);
+      setDeleteCatId(null);
+      await loadCategories();
+      toast.success('Категорію видалено');
+    } catch (e: any) {
+      toast.error(e.response?.data?.message ?? 'Неможливо видалити — можливо, категорія використовується');
+    } finally { setDeletingCat(false); }
+  };
+
   return (
     <div className="space-y-5">
 
@@ -142,16 +213,29 @@ export default function ProductsPage() {
             </div>
           </div>
           {isAdmin && (
-            <button
-              onClick={openCreate}
-              className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
-              style={{
-                background: 'white', color: '#5B6CF0', border: 'none', cursor: 'pointer', fontWeight: '700',
-              }}
-            >
-              <Plus className="h-4 w-4" />
-              Додати товар
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCatOpen(true)}
+                className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
+                style={{
+                  background: 'rgba(255,255,255,0.15)', color: 'white',
+                  border: '1px solid rgba(255,255,255,0.3)', cursor: 'pointer',
+                }}
+              >
+                <Settings2 className="h-4 w-4" />
+                Категорії
+              </button>
+              <button
+                onClick={openCreate}
+                className="flex items-center gap-2 px-4 py-2 rounded text-sm font-semibold transition-all"
+                style={{
+                  background: 'white', color: '#5B6CF0', border: 'none', cursor: 'pointer', fontWeight: '700',
+                }}
+              >
+                <Plus className="h-4 w-4" />
+                Додати товар
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -185,9 +269,18 @@ export default function ProductsPage() {
             {suppliers.map(s => <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>)}
           </SelectContent>
         </Select>
-        {(filterCategory || filterSupplier) && (
+        <Select value={filterWarehouse || "__all__"} onValueChange={v => setFilterWarehouse(v === "__all__" ? "" : v)}>
+          <SelectTrigger className="w-44 h-9">
+            <SelectValue placeholder="Всі склади" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="__all__">Всі склади</SelectItem>
+            {warehouses.map(w => <SelectItem key={w.id} value={w.name}>{w.name}</SelectItem>)}
+          </SelectContent>
+        </Select>
+        {(filterCategory || filterSupplier || filterWarehouse) && (
           <button
-            onClick={() => { setFilterCategory(''); setFilterSupplier(''); }}
+            onClick={() => { setFilterCategory(''); setFilterSupplier(''); setFilterWarehouse(''); }}
             className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
           >
             Скинути фільтри ✕
@@ -199,14 +292,15 @@ export default function ProductsPage() {
       <div className="flex items-center justify-between px-1">
         <p className="text-sm text-slate-500">
           Показано <span className="font-semibold text-slate-800">{filteredProducts.length}</span>
-          {(filterCategory || filterSupplier || search) && (
+          {(filterCategory || filterSupplier || search || filterWarehouse) && (
             <span className="text-slate-400"> з {products.length}</span>
           )} товарів
         </p>
-        {(filterCategory || filterSupplier || search) && (
+        {(filterCategory || filterSupplier || search || filterWarehouse) && (
           <p className="text-xs text-slate-400">
             {filterCategory && <span className="mr-2">📂 {filterCategory}</span>}
             {filterSupplier && <span className="mr-2">🏭 {filterSupplier}</span>}
+            {filterWarehouse && <span className="mr-2">🏠 {filterWarehouse}</span>}
             {search && <span>🔍 "{search}"</span>}
           </p>
         )}
@@ -223,6 +317,7 @@ export default function ProductsPage() {
               <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Од.</th>
               <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Категорія</th>
               <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Постачальник</th>
+              <th className="text-left px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Склади</th>
               <th className="text-center px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Статус</th>
               {isAdmin && <th className="text-center px-4 py-3 font-semibold text-xs uppercase tracking-wide text-white/80">Дії</th>}
             </tr>
@@ -231,14 +326,14 @@ export default function ProductsPage() {
             {loading ? (
               Array.from({ length: 5 }).map((_, i) => (
                 <tr key={i} className="border-b border-slate-100">
-                  {Array.from({ length: isAdmin ? 8 : 7 }).map((_, j) => (
+                  {Array.from({ length: isAdmin ? 9 : 8 }).map((_, j) => (
                     <td key={j} className="px-4 py-3.5"><Skeleton className="h-4 w-24" /></td>
                   ))}
                 </tr>
               ))
             ) : filteredProducts.length === 0 ? (
               <tr>
-                <td colSpan={isAdmin ? 8 : 7}>
+                <td colSpan={isAdmin ? 9 : 8}>
                   <EmptyState
                     title="Товарів не знайдено"
                     description="Додайте перший товар до каталогу"
@@ -279,6 +374,20 @@ export default function ProductsPage() {
                 </td>
                 <td className="px-4 py-3.5 text-slate-600 text-sm">
                   {(prod as any).supplierName ?? prod.supplier?.name ?? '—'}
+                </td>
+                <td className="px-4 py-3.5">
+                  {(productStocks[prod.id] ?? []).length === 0 ? (
+                    <span className="text-xs text-slate-300">—</span>
+                  ) : (
+                    <div className="flex flex-col gap-0.5">
+                      {(productStocks[prod.id] ?? []).map((s, i) => (
+                        <span key={i} className="inline-flex items-center gap-1 text-xs">
+                          <span className="text-slate-500">{s.warehouseName}:</span>
+                          <span className="font-semibold text-slate-700">{s.quantity}</span>
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-3.5 text-center">
                   <span style={{
@@ -335,8 +444,85 @@ export default function ProductsPage() {
         </div>
       )}
 
-      {/* Form Dialog */}
-      <Dialog open={formOpen} onOpenChange={setFormOpen}>
+      {/* ── Модальне вікно: Керування категоріями ── */}
+      <Dialog open={catOpen} onOpenChange={(open) => { setCatOpen(open); if (!open) loadCategories(); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Tag className="h-4 w-4 text-slate-500" />
+              Категорії товарів
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Форма створення */}
+            <div>
+              <Label className="mb-1.5 block text-xs text-slate-500 uppercase tracking-wide">
+                Нова категорія
+              </Label>
+              <div className="flex gap-2">
+                <Input
+                  value={newCatName}
+                  onChange={e => setNewCatName(e.target.value)}
+                  placeholder="Наприклад: Молочна продукція"
+                  onKeyDown={e => { if (e.key === 'Enter') handleCreateCategory(); }}
+                />
+                <Button
+                  onClick={handleCreateCategory}
+                  disabled={catSaving || !newCatName.trim()}
+                  style={{ background: '#3D4A6B', border: 'none', whiteSpace: 'nowrap' }}
+                >
+                  {catSaving ? '...' : <><Plus className="h-4 w-4 mr-1" />Додати</>}
+                </Button>
+              </div>
+            </div>
+
+            {/* Список існуючих */}
+            <div>
+              <Label className="mb-1.5 block text-xs text-slate-500 uppercase tracking-wide">
+                Існуючі категорії ({categories.length})
+              </Label>
+              <div className="rounded-lg border border-slate-200 overflow-hidden max-h-64 overflow-y-auto">
+                {categories.length === 0 ? (
+                  <div className="px-4 py-6 text-center text-sm text-slate-400">
+                    Категорій ще немає. Створіть першу вище.
+                  </div>
+                ) : (
+                  categories.map((c, i) => (
+                    <div
+                      key={c.id}
+                      className="flex items-center justify-between px-3 py-2.5 text-sm"
+                      style={{ background: i % 2 !== 0 ? '#FAFAFA' : 'white', borderBottom: '1px solid #F1F5F9' }}
+                    >
+                      <span className="flex items-center gap-2 text-slate-700">
+                        <Tag className="h-3.5 w-3.5 text-slate-300" />
+                        {c.name}
+                      </span>
+                      <button
+                        onClick={() => setDeleteCatId(c.id)}
+                        className="w-7 h-7 rounded flex items-center justify-center transition-all"
+                        style={{ background: 'rgba(220,38,38,0.06)', color: '#DC2626', border: 'none', cursor: 'pointer' }}
+                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(220,38,38,0.15)'; }}
+                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(220,38,38,0.06)'; }}
+                        title="Видалити категорію"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCatOpen(false)}>Закрити</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Форма товару ── */}
+      <Dialog open={formOpen} onOpenChange={(open) => { if (!catOpen) setFormOpen(open); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>{editItem ? 'Редагувати товар' : 'Новий товар'}</DialogTitle>
@@ -374,12 +560,30 @@ export default function ProductsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">Категорія</Label>
+                <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">
+                  Категорія
+                  {isAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => setCatOpen(true)}
+                      className="ml-2 text-blue-400 hover:text-blue-600 normal-case font-normal tracking-normal"
+                      style={{ fontSize: '10px' }}
+                    >
+                      + керувати
+                    </button>
+                  )}
+                </Label>
                 <Select value={form.categoryId ? String(form.categoryId) : ''}
                   onValueChange={val => setForm(f => ({ ...f, categoryId: Number(val) }))}>
                   <SelectTrigger><SelectValue placeholder="Оберіть..." /></SelectTrigger>
                   <SelectContent>
-                    {categories.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)}
+                    {categories.length === 0 ? (
+                      <div className="px-3 py-2 text-xs text-slate-400">
+                        Немає категорій. Спочатку створіть їх.
+                      </div>
+                    ) : (
+                      categories.map(c => <SelectItem key={c.id} value={String(c.id)}>{c.name}</SelectItem>)
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -399,7 +603,7 @@ export default function ProductsPage() {
               <Label className="mb-1 block text-xs text-slate-500 uppercase tracking-wide">
                 Вартість замовлення (грн)
                 <span className="ml-1 text-slate-300 normal-case font-normal tracking-normal" style={{ fontSize: '10px' }}>
-                  — скільки коштує оформити одне замовлення постачальнику (доставка, оформлення)
+                  — скільки коштує оформити одне замовлення постачальнику
                 </span>
               </Label>
               <Input type="number" min={0} step={0.01} value={form.orderingCost}
@@ -431,7 +635,15 @@ export default function ProductsPage() {
         onCancel={() => setDeleteId(null)}
         loading={deleting}
       />
+
+      <ConfirmDialog
+        open={deleteCatId !== null}
+        title="Видалити категорію?"
+        description="Якщо категорія використовується товарами — видалення буде заблоковано."
+        onConfirm={handleDeleteCategory}
+        onCancel={() => setDeleteCatId(null)}
+        loading={deletingCat}
+      />
     </div>
   );
 }
-

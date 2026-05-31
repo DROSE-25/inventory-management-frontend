@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {
   RefreshCw, FileText, Download, FileSpreadsheet, File,
   BarChart2, AlertTriangle, Package, ShoppingCart, Calendar,
-  TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp,
+  TrendingUp, TrendingDown, Minus, ChevronDown, ChevronUp, HelpCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -69,6 +69,139 @@ function SectionHeader({ title, count, color, onCsv, onExcel, onPdf, icon: Icon,
   );
 }
 
+
+// ── ABC/XYZ hint ─────────────────────────────────────────────────────────────
+function AbcXyzHint() {
+  const [open, setOpen] = useState(false);
+
+  const matrix = [
+    { cls: 'AX', bg: '#DCFCE7', fg: '#059669', desc: 'Пріоритет. Мінімальний страховий запас, точне планування.' },
+    { cls: 'AY', bg: '#DCFCE7', fg: '#059669', desc: 'Пріоритет. Враховувати тренд при замовленні.' },
+    { cls: 'AZ', bg: '#FEF9C3', fg: '#A16207', desc: 'Пріоритет, але нестабільний. Підвищений страховий запас.' },
+    { cls: 'BX', bg: '#EFF6FF', fg: '#2563EB', desc: 'Стабільний, стандартний EOQ.' },
+    { cls: 'BY', bg: '#EFF6FF', fg: '#2563EB', desc: 'Середній пріоритет, помірні коливання.' },
+    { cls: 'BZ', bg: '#FEF9C3', fg: '#A16207', desc: 'Середній пріоритет, нестабільний. Обережно.' },
+    { cls: 'CX', bg: '#F5F6F8', fg: '#475569', desc: 'Замовляти рідко, великими партіями.' },
+    { cls: 'CY', bg: '#F5F6F8', fg: '#475569', desc: 'Мінімальні запаси.' },
+    { cls: 'CZ', bg: '#FEE2E2', fg: '#B91C1C', desc: 'Проблемний. Замовлення під конкретну потребу.' },
+  ];
+
+  return (
+    <div style={{ borderBottom: open ? '1px solid #F2F4F8' : 'none' }}>
+      {/* Toggle button */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="flex items-center gap-2 px-5 py-2.5 w-full text-left transition-colors hover:bg-slate-50"
+        style={{ background: 'rgba(107,127,212,0.04)', border: 'none', cursor: 'pointer' }}
+      >
+        <HelpCircle className="h-3.5 w-3.5" style={{ color: '#6B7FD4' }} />
+        <span className="text-sm font-semibold" style={{ color: '#6B7FD4' }}>
+          Як читати цей звіт?
+        </span>
+        {open
+          ? <ChevronUp className="h-3 w-3 ml-auto" style={{ color: '#6B7FD4' }} />
+          : <ChevronDown className="h-3 w-3 ml-auto" style={{ color: '#6B7FD4' }} />
+        }
+      </button>
+
+      {/* Content */}
+      {open && (
+        <div className="px-5 pb-5 pt-3 space-y-4" style={{ background: 'rgba(107,127,212,0.03)' }}>
+
+          {/* Two columns: ABC + XYZ */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            {/* ABC */}
+            <div className="rounded-lg border p-4" style={{ borderColor: '#E2E8F0', background: 'white' }}>
+              <p className="text-sm font-bold uppercase tracking-wide text-slate-500 mb-3">
+                ABC — за оборотом
+              </p>
+              <div className="space-y-2">
+                {[
+                  { cls: 'A', color: '#059669', bg: '#DCFCE7', label: '~20% SKU → ~80% обороту', desc: 'Пріоритетні товари. Постійний контроль.' },
+                  { cls: 'B', color: '#A16207', bg: '#FEF9C3', label: '~30% SKU → ~15% обороту', desc: 'Середній пріоритет. Стандартний контроль.' },
+                  { cls: 'C', color: '#B91C1C', bg: '#FEE2E2', label: '~50% SKU → ~5% обороту', desc: 'Низький пріоритет. Рідкі перевірки.' },
+                ].map(r => (
+                  <div key={r.cls} className="flex items-start gap-3">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-md shrink-0"
+                      style={{ background: r.bg, color: r.color }}>{r.cls}</span>
+                    <div>
+                      <div className="text-sm font-semibold text-slate-700">{r.label}</div>
+                      <div className="text-sm text-slate-400">{r.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* XYZ */}
+            <div className="rounded-lg border p-4" style={{ borderColor: '#E2E8F0', background: 'white' }}>
+              <p className="text-sm font-bold uppercase tracking-wide text-slate-500 mb-3">
+                XYZ — за стабільністю попиту (CV%)
+              </p>
+              <div className="space-y-2">
+                {[
+                  { cls: 'X', color: '#2563EB', bg: '#EFF6FF', label: 'CV < 10% — стабільний', desc: 'Попит передбачуваний. Точне планування.' },
+                  { cls: 'Y', color: '#7C3AED', bg: '#EDE9FE', label: 'CV 10–25% — помірний', desc: 'Є тренд або сезонність. Обережне планування.' },
+                  { cls: 'Z', color: '#475569', bg: '#F5F6F8', label: 'CV > 25% — нестабільний', desc: 'Непередбачуваний попит. Більший страховий запас.' },
+                ].map(r => (
+                  <div key={r.cls} className="flex items-start gap-3">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-md shrink-0"
+                      style={{ background: r.bg, color: r.color }}>{r.cls}</span>
+                    <div>
+                      <div className="text-sm font-semibold text-slate-700">{r.label}</div>
+                      <div className="text-sm text-slate-400">{r.desc}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Matrix 3x3 */}
+          <div>
+            <p className="text-sm font-bold uppercase tracking-wide text-slate-500 mb-2">
+              Матриця ABC × XYZ — стратегії управління
+            </p>
+            <div className="overflow-x-auto">
+              <table className="text-xs border-collapse w-full">
+                <thead>
+                  <tr>
+                    <th className="px-3 py-2 text-slate-400 font-semibold text-right w-10"></th>
+                    {['X — стабільний', 'Y — змінний', 'Z — нестабільний'].map(h => (
+                      <th key={h} className="px-3 py-2 text-center font-bold text-slate-600 text-sm"
+                        style={{ background: '#F5F6F8', borderBottom: '2px solid #E2E8F0' }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {['A', 'B', 'C'].map((abc, ri) => (
+                    <tr key={abc}>
+                      <td className="px-3 py-2 font-bold text-center text-slate-600"
+                        style={{ background: '#F5F6F8', borderRight: '2px solid #E2E8F0' }}>{abc}</td>
+                      {['X', 'Y', 'Z'].map((xyz) => {
+                        const m = matrix.find(x => x.cls === abc + xyz)!;
+                        return (
+                          <td key={xyz} className="px-3 py-2 border"
+                            style={{ background: m.bg, borderColor: '#E2E8F0' }}>
+                            <div className="font-bold mb-0.5" style={{ color: m.fg }}>{m.cls}</div>
+                            <div className="text-slate-500 leading-tight" style={{ fontSize: 13 }}>{m.desc}</div>
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── main ─────────────────────────────────────────────────────────────────────
 export default function ReportsPage() {
   const [abcData, setAbcData]           = useState<any[]>([]);
@@ -76,6 +209,7 @@ export default function ReportsPage() {
   const [productsData, setProductsData] = useState<any[]>([]);
   const [salesData, setSalesData]       = useState<any[]>([]);
   const [loading, setLoading]           = useState(true);
+  const [recalculating, setRecalculating] = useState(false);
 
   const today    = new Date().toISOString().split('T')[0];
   const monthAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -101,6 +235,19 @@ export default function ReportsPage() {
   };
 
   useEffect(() => { loadAll(); }, []);
+
+  const handleRecalculate = async () => {
+    setRecalculating(true);
+    try {
+      await apiClient.post('/analysis/recalculate');
+      toast.success('ABC/XYZ аналіз перераховано');
+      await loadAll();
+    } catch {
+      toast.error('Помилка перерахунку');
+    } finally {
+      setRecalculating(false);
+    }
+  };
 
   // Handlers
   const handleAbcExcel = async () => {
@@ -252,6 +399,22 @@ export default function ReportsPage() {
               onToggle={() => toggle('abc')}
               onCsv={handleAbcCsv} onExcel={handleAbcExcel}
             />
+            <div className="px-4 py-3 border-b bg-slate-50 flex items-center justify-between">
+              <p className="text-xs text-slate-400">
+                {abcData.length === 0
+                  ? 'Дані аналізу відсутні — натисніть «Перерахувати»'
+                  : `Останнє оновлення: сьогодні · ${abcData.length} товарів`}
+              </p>
+              <button
+                onClick={handleRecalculate}
+                disabled={recalculating}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all text-white"
+                style={{ background: recalculating ? '#94A3B8' : 'linear-gradient(135deg, #6B7FD4, #8E9EF7)', border: 'none', cursor: recalculating ? 'not-allowed' : 'pointer' }}
+              >
+                {recalculating ? '⏳ Розраховую...' : '🔄 Перерахувати'}
+              </button>
+            </div>
+            <AbcXyzHint />
             {openSections.abc && abcData.length > 0 && (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
